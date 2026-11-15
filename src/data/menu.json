@@ -3,76 +3,103 @@
   "min_guests": 10,
   "packages": [
     {
-      "id": "2-course",
-      "name": "2-Course Feast",
-      "description": "Choose any Starter + Main (or Main + Dessert)",
-      "price_per_person": 185
+      "id": "dawat-2-course",
+      "name": "Bengali Dawat (2-Course)",
+      "description": "Choice of Starter/Bhorta + Signature Main Dish",
+      "price_per_person": 195
     },
     {
-      "id": "3-course",
-      "name": "3-Course Royal Combo",
-      "description": "Choose Starter + Main + Dessert",
+      "id": "royal-3-course",
+      "name": "Royal Feast (3-Course)",
+      "description": "Starter + Signature Main + Traditional Mishti Dessert",
       "price_per_person": 245
     },
     {
-      "id": "buffet",
-      "name": "Grand Event Buffet",
-      "description": "Mix & match multiple Starters, Mains, Sides & Desserts",
-      "price_per_person": 295
+      "id": "grand-buffet",
+      "name": "Grand Celebration Buffet",
+      "description": "Multi-dish Bengali banquet spread for weddings & parties",
+      "price_per_person": 310
     }
   ],
   "dishes": [
     {
-      "name": "Crispy Vegetable Samosas (2 pcs)",
+      "name": "Shingara & Vegetable Chop Platter",
       "category": "Starters",
-      "description": "Spiced potato & green pea pastry served with mint tamarind chutney",
+      "description": "Crispy Bengali spiced potato pastry & beetroot-vegetable croquettes with tamarind chutney",
       "extra_price": 0,
-      "dietary": ["Vegetarian", "Vegan", "Halal"],
+      "dietary": ["Vegetarian", "Halal"],
       "photo": "",
       "available": true
     },
     {
-      "name": "Royal Chicken Biryani",
+      "name": "Traditional Bhorta Trio (Aloo, Begun, Shutki/Dal)",
+      "category": "Starters",
+      "description": "Classic hand-mashed Bengali specialties seasoned with mustard oil, roasted chili & cilantro",
+      "extra_price": 15,
+      "dietary": ["Gluten-Free", "Halal"],
+      "photo": "",
+      "available": true
+    },
+    {
+      "name": "Dhakai Kacchi Biryani",
       "category": "Mains",
-      "description": "Aromatic saffron basmati rice layered with marinated chicken & raita",
+      "description": "Slow-cooked aromatic Chinigura rice layered with marinated meat, potatoes & boiled egg",
+      "extra_price": 30,
+      "dietary": ["Halal", "Gluten-Free"],
+      "photo": "",
+      "available": true
+    },
+    {
+      "name": "Chicken Roast (Biye Bari Style)",
+      "category": "Mains",
+      "description": "Festive Bengali braised chicken in rich caramelized onion, yogurt & mild aromatic spice gravy",
       "extra_price": 0,
       "dietary": ["Halal", "Gluten-Free"],
       "photo": "",
       "available": true
     },
     {
-      "name": "Slow-Cooked Lamb Rogan Josh",
+      "name": "Kosha Mangsho (Slow-Cooked Beef/Lamb Bhuna)",
       "category": "Mains",
-      "description": "Tender lamb simmered in Kashmiri spices",
+      "description": "Rich, dark roasted spice curry slow-cooked to tender perfection",
+      "extra_price": 25,
+      "dietary": ["Halal", "Gluten-Free"],
+      "photo": "",
+      "available": true
+    },
+    {
+      "name": "Shorshe Ilish / Mustard Fish Curry",
+      "category": "Mains",
+      "description": "Traditional Bengali fish simmered in pungent yellow & black mustard paste with green chilies",
       "extra_price": 35,
       "dietary": ["Halal", "Gluten-Free"],
       "photo": "",
       "available": true
     },
     {
-      "name": "Paneer Butter Masala",
+      "name": "Chana Dal & Paneer Tarkari",
       "category": "Mains",
-      "description": "Cottage cheese cubes in a rich creamy tomato-cashew gravy",
+      "description": "Bengal gram lentils cooked with golden paneer cubes, cumin & ginger",
       "extra_price": 0,
       "dietary": ["Vegetarian", "Gluten-Free"],
       "photo": "",
       "available": true
     },
     {
-      "name": "Garlic & Herb Naan Basket",
+      "name": "Saffron Peas Polao & Luchi",
       "category": "Sides",
-      "description": "Freshly baked tandoori flatbread brushed with garlic butter",
+      "description": "Fragrant ghee-roasted Chinigura polao served alongside fluffy puffed luchi bread",
       "extra_price": 15,
-      "dietary": ["Vegetarian"],
+      "dietary": ["Vegetarian", "Halal"],
       "photo": "",
       "available": true
     },
     {
-      "name": "Mango Saffron Cheesecake",
+      "name": "Mishti Doi & Roshogolla Duo",
       "category": "Desserts",
-      "description": "Velvety Alphonso mango mousse over biscuit crumble",
+      "description": "Caramelized Bengali sweet yogurt paired with soft syrup-soaked cottage cheese dumplings",
       "extra_price": 0,
-      "dietary": ["Vegetarian"],
+      "dietary": ["Vegetarian", "Gluten-Free"],
       "photo": "",
       "available": true
     }
