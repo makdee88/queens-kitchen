@@ -71,4 +71,20 @@ queens-kitchen/
 ├── .pages.yml                  # Controls the visual forms inside Pages CMS
 ├── trigger-build.json          # "Publish switch" that tells Cloudflare when to rebuild
 ├── public/
-│   └── images/uploads/         # Photos
+│   └── images/uploads/         # Photos uploaded through Pages CMS
+├── src/
+│   ├── content/events/         # Individual event announcements (.md files)
+│   ├── data/
+│   │   ├── about.json          # About Us page text & kitchen standards
+│   │   ├── kitchen-gallery.json# Gallery photo list & captions
+│   │   ├── menu.json           # Combo packages, dishes & prices
+│   │   └── settings.json       # Phone, email, Facebook URL & top banner
+│   └── pages/
+│       ├── index.astro         # Home page
+│       ├── about-us.astro      # About Us page
+│       ├── events.astro        # Upcoming Events page
+│       ├── gallery.astro       # Auto-compressed Photo Gallery
+│       └── menu.astro          # Interactive Combo Menu & Price Calculator
+└── functions/
+    └── api/
+        └── submit-order.js     # Receives menu calculator submissions & saves leads
