@@ -1,19 +1,300 @@
 ---
-import Layout from "~/layouts/Layout.astro";
-import Section from "~/components/Section.astro";
-import Heading from "~/components/Heading.astro";
-import MenuList from "~/components/Menu.astro";
+import Layout from '../layouts/Layout.astro';
+import menuData from '../data/menu.json';
+import settings from '../data/settings.json';
+
+const availableDishes = menuData.dishes.filter((d) => d.available !== false);
+const categories = ['Starters', 'Mains', 'Sides', 'Desserts', 'Drinks'].filter((cat) =>
+  availableDishes.some((d) => d.category === cat)
+);
 ---
 
-<Layout>
-	<Section>
-		<Heading>
-			<h1 slot="heading-title" class="font-black text-brand-green h2">Our menu</h1>
-			<p slot="heading-content">
-				We offer a variety of dishes, from traditional to modern, that are sure to satisfy your cravings.
-			</p>
-		</Heading>
+<Layout title={`Build Your Menu Combo | ${settings.business_name}`}>
+  <section
+    class="max-w-7xl mx-auto px-4 py-12"
+    x-data={`{
+      currency: ${JSON.stringify(menuData.currency)},
+      minGuests: ${menuData.min_guests},
+      guests: ${menuData.min_guests},
+      packages: ${JSON.stringify(menuData.packages)},
+      selectedPackageId: ${JSON.stringify(menuData.packages[0]?.id || '')},
+      activeCategory: ${JSON.stringify(categories[0] || 'Starters')},
+      selectedDishes: [],
+      customer: { name: '', email: '', phone: '', event_date: '', notes: '' },
+      submitting: false,
+      submitted: false,
+      errorMsg: '',
 
-		<MenuList />
-	</Section>
+      get currentPackage() {
+        return this.packages.find(p => p.id === this.selectedPackageId) || { name: 'Custom', price_per_person: 0 };
+      },
+      toggleDish(dish) {
+        const idx = this.selectedDishes.findIndex(d => d.name === dish.name);
+        if (idx > -1) {
+          this.selectedDishes.splice(idx, 1);
+        } else {
+          this.selectedDishes.push({ name: dish.name, category: dish.category, extra_price: Number(dish.extra_price || 0) });
+        }
+      },
+      isSelected(dishName) {
+        return this.selectedDishes.some(d => d.name === dishName);
+      },
+      get extraPerPerson() {
+        return this.selectedDishes.reduce((sum, d) => sum + Number(d.extra_price || 0), 0);
+      },
+      get pricePerPerson() {
+        return Number(this.currentPackage.price_per_person || 0) + this.extraPerPerson;
+      },
+      get totalPrice() {
+        const validGuests = Math.max(this.minGuests, Number(this.guests) || this.minGuests);
+        return validGuests * this.pricePerPerson;
+      },
+      async submitOrder() {
+        this.errorMsg = '';
+        if (!this.customer.name || !this.customer.email || !this.customer.phone) {
+          this.errorMsg = 'Please enter your name, email, and phone number.';
+          return;
+        }
+        if (this.selectedDishes.length === 0) {
+          this.errorMsg = 'Please select at least one dish for your combo.';
+          return;
+        }
+        this.submitting = true;
+        try {
+          const res = await fetch('/api/submit-order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              ...this.customer,
+              guests: Math.max(this.minGuests, Number(this.guests)),
+              package_name: this.currentPackage.name,
+              selected_dishes: this.selectedDishes,
+              price_per_person: this.pricePerPerson,
+              total_price: this.totalPrice,
+              currency: this.currency
+            })
+          });
+          if (!res.ok) throw new Error('Submission failed');
+          this.submitted = true;
+        } catch (err) {
+          this.errorMsg = 'Could not send request right now. Please try again or call us directly.';
+        } finally {
+          this.submitting = false;
+        }
+      }
+    }`}
+  >
+    <div class="text-center max-w-2xl mx-auto mb-10">
+      <h1 class="text-4xl font-bold tracking-tight mb-3">Build Your Menu Combo</h1>
+      <p class="text-gray-600">
+        Select a base package, pick your favorite dishes, and see your instant price estimate.
+      </p>
+    </div>
+
+    <div class="grid lg:grid-cols-3 gap-8 items-start">
+      <!-- Left 2 Columns: Package & Dish Selection -->
+      <div class="lg:col-span-2 space-y-8">
+        <!-- Step 1: Base Package & Guests -->
+        <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+          <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+            <h2 class="text-xl font-bold">1. Choose Combo Package</h2>
+            <div class="flex items-center gap-2">
+              <label class="text-sm font-medium text-gray-700">Guests (Min {menuData.min_guests}):</label>
+              <input
+                type="number"
+                min={menuData.min_guests}
+                x-model.number="guests"
+                class="w-24 rounded-lg border-gray-300 border px-3 py-1.5 text-center font-semibold"
+              />
+            </div>
+          </div>
+
+          <div class="grid sm:grid-cols-3 gap-4">
+            {menuData.packages.map((pkg) => (
+              <button
+                type="button"
+                @click={`selectedPackageId = '${pkg.id}'`}
+                :class={`selectedPackageId === '${pkg.id}' ? 'border-amber-600 bg-amber-50/70 ring-2 ring-amber-600/20' : 'border-gray-200 hover:border-amber-300'`}
+                class="text-left p-4 rounded-xl border transition flex flex-col justify-between"
+              >
+                <div>
+                  <div class="font-bold text-gray-900">{pkg.name}</div>
+                  <p class="text-xs text-gray-600 mt-1">{pkg.description}</p>
+                </div>
+                <div class="mt-4 text-sm font-bold text-amber-800">
+                  {pkg.price_per_person} {menuData.currency} / person
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <!-- Step 2: Dish Selection by Category -->
+        <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+          <h2 class="text-xl font-bold mb-4">2. Pick Your Dishes</h2>
+
+          <!-- Category Tabs -->
+          <div class="flex flex-wrap gap-2 mb-6 border-b border-gray-100 pb-3">
+            {categories.map((cat) => (
+              <button
+                type="button"
+                @click={`activeCategory = '${cat}'`}
+                :class={`activeCategory === '${cat}' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'`}
+                class="px-4 py-2 rounded-full text-sm font-medium transition"
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+
+          <!-- Dish Cards -->
+          <div class="grid sm:grid-cols-2 gap-4">
+            {availableDishes.map((dish) => (
+              <div
+                x-show={`activeCategory === '${dish.category}'`}
+                @click={`toggleDish(${JSON.stringify(dish)})`}
+                :class={`isSelected(${JSON.stringify(dish.name)}) ? 'border-amber-600 bg-amber-50/50' : 'border-gray-200 hover:border-gray-300'`}
+                class="cursor-pointer p-4 rounded-xl border transition flex justify-between items-start gap-3"
+              >
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="font-semibold text-gray-900">{dish.name}</span>
+                    {dish.extra_price > 0 ? (
+                      <span class="text-xs font-semibold bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full">
+                        +{dish.extra_price} {menuData.currency}/pp
+                      </span>
+                    ) : (
+                      <span class="text-xs text-emerald-700 font-medium">Included</span>
+                    )}
+                  </div>
+                  {dish.description && (
+                    <p class="text-xs text-gray-600 mt-1">{dish.description}</p>
+                  )}
+                  {dish.dietary && dish.dietary.length > 0 && (
+                    <div class="flex flex-wrap gap-1 mt-2">
+                      {dish.dietary.map((tag: string) => (
+                        <span class="text-[11px] px-2 py-0.5 bg-gray-100 text-gray-600 rounded">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <input
+                  type="checkbox"
+                  :checked={`isSelected(${JSON.stringify(dish.name)})`}
+                  class="mt-1 h-5 w-5 rounded border-gray-300 text-amber-600 focus:ring-amber-500 pointer-events-none"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Sticky Summary & Contact Lead Form -->
+      <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-md lg:sticky lg:top-6">
+        <h2 class="text-xl font-bold mb-4">Your Custom Menu Summary</h2>
+
+        <div class="space-y-2 text-sm border-b border-gray-100 pb-4 mb-4">
+          <div class="flex justify-between">
+            <span class="text-gray-600">Package:</span>
+            <span class="font-semibold" x-text="currentPackage.name"></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600">Guests:</span>
+            <span class="font-semibold" x-text="Math.max(minGuests, guests)"></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600">Rate per person:</span>
+            <span class="font-semibold" x-text="`${pricePerPerson} ${currency}`"></span>
+          </div>
+        </div>
+
+        <!-- Selected Dishes List -->
+        <div class="mb-4">
+          <div class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
+            Selected Dishes (<span x-text="selectedDishes.length"></span>)
+          </div>
+          <template x-if="selectedDishes.length === 0">
+            <p class="text-xs text-gray-400 italic">Click dishes on the left to add them to your combo.</p>
+          </template>
+          <ul class="space-y-1.5 max-h-40 overflow-y-auto text-sm">
+            <template x-for="item in selectedDishes" :key="item.name">
+              <li class="flex justify-between items-center bg-gray-50 px-2.5 py-1.5 rounded-lg">
+                <span x-text="item.name" class="truncate pr-2"></span>
+                <button
+                  type="button"
+                  @click="toggleDish(item)"
+                  class="text-xs text-red-600 hover:underline shrink-0"
+                >
+                  Remove
+                </button>
+              </li>
+            </template>
+          </ul>
+        </div>
+
+        <!-- Total Price Box -->
+        <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 flex justify-between items-center">
+          <span class="font-semibold text-amber-950">Estimated Total</span>
+          <span class="text-2xl font-extrabold text-amber-900" x-text="`${totalPrice} ${currency}`"></span>
+        </div>
+
+        <!-- Lead Form -->
+        <template x-if="submitted">
+          <div class="bg-emerald-50 border border-emerald-200 text-emerald-900 p-4 rounded-xl text-sm">
+            <p class="font-bold mb-1">Thank you! Your menu request is saved.</p>
+            <p>We will contact you shortly via phone or email to confirm your booking.</p>
+          </div>
+        </template>
+
+        <form x-show="!submitted" @submit.prevent="submitOrder" class="space-y-3">
+          <input
+            type="text"
+            placeholder="Your Name *"
+            required
+            x-model="customer.name"
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+          />
+          <input
+            type="email"
+            placeholder="Email Address *"
+            required
+            x-model="customer.email"
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+          />
+          <input
+            type="tel"
+            placeholder="Phone / WhatsApp Number *"
+            required
+            x-model="customer.phone"
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+          />
+          <input
+            type="date"
+            x-model="customer.event_date"
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-600"
+          />
+          <textarea
+            rows="2"
+            placeholder="Allergies or special requests (optional)"
+            x-model="customer.notes"
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+          ></textarea>
+
+          <p x-show="errorMsg" x-text="errorMsg" class="text-xs text-red-600 font-medium"></p>
+
+          <button
+            type="submit"
+            :disabled="submitting"
+            class="w-full py-3 px-4 rounded-xl bg-gray-900 text-white font-semibold hover:bg-amber-700 transition disabled:opacity-50"
+          >
+            <span x-show="!submitting">Send Menu & Request Quote</span>
+            <span x-show="submitting">Sending...</span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
 </Layout>

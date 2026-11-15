@@ -1,1 +1,80 @@
-{ "currency": "SEK", "min_guests": 10, "packages": [], "dishes": [] }
+{
+  "currency": "SEK",
+  "min_guests": 10,
+  "packages": [
+    {
+      "id": "2-course",
+      "name": "2-Course Feast",
+      "description": "Choose any Starter + Main (or Main + Dessert)",
+      "price_per_person": 185
+    },
+    {
+      "id": "3-course",
+      "name": "3-Course Royal Combo",
+      "description": "Choose Starter + Main + Dessert",
+      "price_per_person": 245
+    },
+    {
+      "id": "buffet",
+      "name": "Grand Event Buffet",
+      "description": "Mix & match multiple Starters, Mains, Sides & Desserts",
+      "price_per_person": 295
+    }
+  ],
+  "dishes": [
+    {
+      "name": "Crispy Vegetable Samosas (2 pcs)",
+      "category": "Starters",
+      "description": "Spiced potato & green pea pastry served with mint tamarind chutney",
+      "extra_price": 0,
+      "dietary": ["Vegetarian", "Vegan", "Halal"],
+      "photo": "",
+      "available": true
+    },
+    {
+      "name": "Royal Chicken Biryani",
+      "category": "Mains",
+      "description": "Aromatic saffron basmati rice layered with marinated chicken & raita",
+      "extra_price": 0,
+      "dietary": ["Halal", "Gluten-Free"],
+      "photo": "",
+      "available": true
+    },
+    {
+      "name": "Slow-Cooked Lamb Rogan Josh",
+      "category": "Mains",
+      "description": "Tender lamb simmered in Kashmiri spices",
+      "extra_price": 35,
+      "dietary": ["Halal", "Gluten-Free"],
+      "photo": "",
+      "available": true
+    },
+    {
+      "name": "Paneer Butter Masala",
+      "category": "Mains",
+      "description": "Cottage cheese cubes in a rich creamy tomato-cashew gravy",
+      "extra_price": 0,
+      "dietary": ["Vegetarian", "Gluten-Free"],
+      "photo": "",
+      "available": true
+    },
+    {
+      "name": "Garlic & Herb Naan Basket",
+      "category": "Sides",
+      "description": "Freshly baked tandoori flatbread brushed with garlic butter",
+      "extra_price": 15,
+      "dietary": ["Vegetarian"],
+      "photo": "",
+      "available": true
+    },
+    {
+      "name": "Mango Saffron Cheesecake",
+      "category": "Desserts",
+      "description": "Velvety Alphonso mango mousse over biscuit crumble",
+      "extra_price": 0,
+      "dietary": ["Vegetarian"],
+      "photo": "",
+      "available": true
+    }
+  ]
+}

@@ -3,7 +3,6 @@ media:
   output: /images/uploads
 
 content:
-  # 1. Upcoming Events (Each event is saved as its own Markdown file)
   - name: events
     label: Upcoming Events
     type: collection
@@ -45,7 +44,6 @@ content:
         label: Event Details
         type: rich-text
 
-  # 2. Interactive Menu & Combo Builder Data (Saved as a single JSON file)
   - name: menu
     label: Menu & Combo Builder
     type: file
@@ -69,7 +67,7 @@ content:
         list: true
         fields:
           - name: id
-            label: Package ID (e.g. 2-course, 3-course, buffet)
+            label: Package ID (e.g. 2-course, 3-course)
             type: string
             required: true
           - name: name
@@ -134,7 +132,6 @@ content:
             type: boolean
             default: true
 
-  # 3. General Kitchen Settings (Phone, Email, Opening Hours)
   - name: settings
     label: Kitchen Contact & Hours
     type: file
