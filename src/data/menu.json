@@ -6,19 +6,19 @@
       "id": "kolkata-bhoj",
       "name": "Kolkata Bhoj (2-Course)",
       "description": "Base Combo: 1 Starter + 1 Main Dish (upgrade or add extra items below)",
-      "price_per_person": 195
+      "price_per_person": 152
     },
     {
       "id": "royal-feast",
       "name": "Royal Bengali Feast (3-Course)",
       "description": "Base Combo: 1 Starter + 1 Main + 1 Bengali Mishti Dessert",
-      "price_per_person": 245
+      "price_per_person": 195
     },
     {
       "id": "maharaja-thali",
       "name": "Maharaja Thali",
       "description": "Grand Royal Platter: Starter + Polao/Biryani + 2 Mains + Sides + Mishti Duo",
-      "price_per_person": 325
+      "price_per_person": 235
     }
   ],
   "dishes": [
