@@ -1,88 +1,69 @@
 ---
-import Layout from "~/layouts/Layout.astro";
-import Section from "~/components/Section.astro";
-import Hero from "~/components/Hero.astro";
-import { Picture } from "astro:assets";
-import Badge from "~/components/Badge.astro";
-import Button from "~/components/Button.astro";
-import ButtonCallUs from "~/components/ButtonCallUs.astro";
-import Article from "~/components/Article.astro";
-
-// Images
-import PizzaHero from "~/assets/images/pizza-hero.png";
+import Layout from '../layouts/Layout.astro';
+import settings from '../data/settings.json';
 ---
 
-<Layout>
-	<Section class:list={"bg-white"}>
-		<Hero>
-			<div slot="hero-content-left" class="prose max-w-none max-lg:order-1">
-				<Badge title="il ristorante italiana" />
-				<h1 class="font-black">Real Italian food in a real Italian restaurant...</h1>
+<Layout title={`About Us | ${settings.business_name}`}>
+  <section class="max-w-4xl mx-auto px-4 py-16 space-y-12">
+    <div class="text-center space-y-4">
+      <span class="text-xs font-bold uppercase tracking-widest text-amber-700">Our Story</span>
+      <h1 class="text-4xl font-extrabold text-gray-900">Bringing the Soul of West Bengal to Stockholm</h1>
+      <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+        Queen's Kitchen was born from a passion for sharing authentic, home-style Bengali cuisine rooted in the rich culinary traditions of Kolkata and West Bengal, India.
+      </p>
+    </div>
 
-				<p>
-					Experience the taste of Italy with our authentic dishes made from the finest ingredients. Indulge in
-					our wide variety of pizzas, pastas, and desserts, all crafted with love and tradition. Whether
-					you're dining in or taking out, we promise a memorable culinary experience.
-				</p>
+    <div class="grid md:grid-cols-2 gap-8 items-center bg-amber-50/60 p-8 rounded-3xl border border-amber-100">
+      <div class="space-y-4">
+        <h2 class="text-2xl font-bold text-gray-900">Heritage Recipes, Freshly Prepared</h2>
+        <p class="text-sm text-gray-700 leading-relaxed">
+          West Bengal's cuisine is celebrated for its delicate balance of aromatic spices, mustard oil, poppy seeds (posto), freshly roasted panch phoron, and signature sweets. Every dish at Queen's Kitchen is cooked from scratch in small batches — never mass-produced.
+        </p>
+        <p class="text-sm text-gray-700 leading-relaxed">
+          Whether you are hosting an intimate family gathering, a birthday celebration, a Puja feast, or a corporate lunch in Stockholm, we tailor every menu to your guests' preferences.
+        </p>
+      </div>
 
-				<span class="text-brand-green font-medium">✔ We also deliver</span>
+      <div class="bg-white p-6 rounded-2xl border border-amber-200/70 space-y-4 shadow-sm">
+        <h3 class="font-bold text-gray-900 text-lg">Our Kitchen Standards</h3>
+        <ul class="space-y-3 text-sm text-gray-700">
+          <li class="flex items-start gap-2.5">
+            <span class="text-emerald-600 font-bold">✓</span>
+            <span><strong>Strictly No Beef & No Pork:</strong> Our kitchen never cooks or handles beef or pork products.</span>
+          </li>
+          <li class="flex items-start gap-2.5">
+            <span class="text-emerald-600 font-bold">✓</span>
+            <span><strong>Authentic West Bengal Flavors:</strong> Classic Kolkata Dum Biryani, Kosha Mangsho (mutton), Shorshe Maach, Cholar Dal & Mishti.</span>
+          </li>
+          <li class="flex items-start gap-2.5">
+            <span class="text-emerald-600 font-bold">✓</span>
+            <span><strong>Dietary Friendly:</strong> Dedicated vegetarian, vegan, gluten-free, and halal-certified meat options available.</span>
+          </li>
+        </ul>
+      </div>
+    </div>
 
-				<div class="mt-8 flex items-center gap-x-8">
-					<Button url="/book">Book now</Button>
-					<ButtonCallUs />
-				</div>
-			</div>
-			<div slot="hero-content-right">
-				<Picture
-					class:list={"mx-auto"}
-					src={PizzaHero}
-					height={600}
-					formats={["avif", "webp"]}
-					alt="A description of my image."
-					loading={"eager"}
-					fetchpriority={"high"}
-				/>
-			</div>
-		</Hero>
-	</Section>
-
-	<Section class:list={'bg-white'}>
-		<Article>
-			<h2>Welcome to AstroPie</h2>
-			<p>
-				Nestled in the heart of the city, <strong>AstroPie</strong> offers an authentic Italian dining experience
-				like no other. From the moment you step through our doors, you'll be transported to the vibrant streets of
-				Italy, where good food and great company are at the center of life.
-			</p>
-
-			<h3>Our Story</h3>
-			<p>
-				Founded in <em>1998</em>, our family-owned restaurant has always been a labor of love. Inspired by the
-				recipes passed down through generations, we bring the <u>rich culinary heritage</u> of Italy to your plate.
-				Every dish tells a story, and every meal is a celebration of flavor.
-			</p>
-
-			<h3>Our Philosophy</h3>
-			<blockquote>"The secret ingredient is always love."</blockquote>
-			<p>
-				At AstroPie, we believe in the simple joy of fresh ingredients, time-honored techniques, and a
-				passion for creating memorable meals. From our hand-rolled pasta to our wood-fired pizzas, every bite is
-				crafted with care.
-			</p>
-
-			<h4>What Makes Us Special?</h4>
-			<ul>
-				<li><strong>Authenticity:</strong> Traditional recipes, just like Nonna used to make.</li>
-				<li><strong>Fresh Ingredients:</strong> Locally sourced produce and imported Italian staples.</li>
-				<li><strong>Warm Atmosphere:</strong> A place where everyone feels like family.</li>
-			</ul>
-
-			<h3>Join Us</h3>
-			<p>
-				Whether you're celebrating a special occasion or simply indulging in the pleasures of Italian cuisine, <strong
-					>AstroPie</strong
-				> is the perfect destination. <em>Come for the food, stay for the memories.</em>
-			</p>
-		</Article>
-	</Section>
+    <div class="text-center space-y-4 pt-4">
+      <h2 class="text-2xl font-bold text-gray-900">Connect With Us</h2>
+      <p class="text-sm text-gray-600">
+        Follow our latest event menus, seasonal Pitha & Mishti specials, and customer stories on Facebook.
+      </p>
+      <div class="flex flex-wrap justify-center gap-4">
+        <a
+          href="/menu"
+          class="px-6 py-3 rounded-xl bg-gray-900 text-white font-semibold text-sm hover:bg-amber-700 transition"
+        >
+          Build Your Custom Menu
+        </a>
+        <a
+          href={settings.facebook_url}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="px-6 py-3 rounded-xl border border-gray-300 text-gray-800 font-semibold text-sm hover:bg-gray-50 transition"
+        >
+          Visit Facebook Page
+        </a>
+      </div>
+    </div>
+  </section>
 </Layout>

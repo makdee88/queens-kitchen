@@ -16,8 +16,7 @@ const upcomingEvents = Object.values(eventImports)
 const featuredDishes = menuData.dishes.filter((d) => d.available !== false).slice(0, 6);
 ---
 
-<Layout title={`${settings.business_name} | Authentic Bengali Cuisine in Stockholm`}>
-  <!-- Top Announcement Bar (Controlled via Pages CMS) -->
+<Layout title={`${settings.business_name} | Authentic West Bengal Cuisine in Stockholm`}>
   {settings.banner_notice && (
     <div class="bg-amber-900 text-amber-50 text-center text-xs sm:text-sm py-2.5 px-4 font-medium tracking-wide">
       {settings.banner_notice}
@@ -29,13 +28,13 @@ const featuredDishes = menuData.dishes.filter((d) => d.available !== false).slic
     <div class="max-w-6xl mx-auto px-4 py-20 sm:py-28 grid lg:grid-cols-12 gap-10 items-center">
       <div class="lg:col-span-7 space-y-6">
         <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-widest bg-amber-500/20 text-amber-300 border border-amber-400/30">
-          Stockholm • Authentic Bengali Kitchen
+          Stockholm • Flavors of West Bengal, India
         </span>
         <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight">
-          Royal Flavors of Bengal, Crafted for Your Table
+          Authentic Taste of Kolkata & West Bengal in Stockholm
         </h1>
         <p class="text-base sm:text-lg text-amber-100/85 max-w-2xl leading-relaxed">
-          From slow-cooked Kacchi Biryani and rich Kosha Mangsho to traditional Bengali sweets and festive platters — experience homemade heritage cooking across Stockholm.
+          From aromatic Kolkata Dum Biryani and slow-cooked Kosha Mangsho (mutton) to mustard fish delicacies, Luchi-Aloor Dom, and traditional Mishti — crafted fresh for your celebrations.
         </p>
 
         <div class="flex flex-wrap gap-4 pt-2">
@@ -53,7 +52,7 @@ const featuredDishes = menuData.dishes.filter((d) => d.available !== false).slic
           </a>
         </div>
 
-        <div class="pt-4 flex items-center gap-6 text-sm text-amber-200/80">
+        <div class="pt-4 flex flex-wrap items-center gap-6 text-sm text-amber-200/80">
           <a
             href={settings.facebook_url}
             target="_blank"
@@ -65,6 +64,9 @@ const featuredDishes = menuData.dishes.filter((d) => d.available !== false).slic
             </svg>
             Follow Queen's Kitchen Stockholm on Facebook
           </a>
+          <span class="text-xs bg-white/10 px-3 py-1 rounded-full text-amber-200">
+            100% Beef-Free & Pork-Free Kitchen
+          </span>
         </div>
       </div>
 
@@ -74,15 +76,15 @@ const featuredDishes = menuData.dishes.filter((d) => d.available !== false).slic
           <div class="text-xs font-bold uppercase tracking-widest text-amber-300">
             Custom Event & Party Catering
           </div>
-          <h2 class="text-2xl font-bold">Plan Your Feast in Minutes</h2>
+          <h2 class="text-2xl font-bold">Plan Your Bengali Feast in Minutes</h2>
           <ul class="space-y-3 text-sm text-amber-50/90">
             <li class="flex items-start gap-2.5">
               <span class="text-amber-400 font-bold">✓</span>
-              <span>Choose from 2-Course, 3-Course, or Grand Bengali Buffet packages</span>
+              <span>Choose from Kolkata Bhoj (2-Course), Royal 3-Course, or Grand Utshob Buffet</span>
             </li>
             <li class="flex items-start gap-2.5">
               <span class="text-amber-400 font-bold">✓</span>
-              <span>Mix & match Bhorta, Biryani, Bhuna, Vegetarian & Halal options</span>
+              <span>Mix & match Chicken, Mutton, Seafood, Pure Vegetarian & Vegan dishes</span>
             </li>
             <li class="flex items-start gap-2.5">
               <span class="text-amber-400 font-bold">✓</span>
@@ -100,39 +102,39 @@ const featuredDishes = menuData.dishes.filter((d) => d.available !== false).slic
     </div>
   </section>
 
-  <!-- Bengali Specialties Strip -->
+  <!-- West Bengal Specialties Strip -->
   <section class="max-w-6xl mx-auto px-4 py-16">
     <div class="text-center max-w-2xl mx-auto mb-12">
-      <span class="text-xs font-bold uppercase tracking-widest text-amber-700">Our Heritage</span>
-      <h2 class="text-3xl font-bold text-gray-900 mt-1">True Taste of Bengali Cooking</h2>
+      <span class="text-xs font-bold uppercase tracking-widest text-amber-700">Culinary Heritage of West Bengal</span>
+      <h2 class="text-3xl font-bold text-gray-900 mt-1">From Kolkata Kitchens to Stockholm</h2>
       <p class="text-gray-600 mt-2 text-sm sm:text-base">
-        Prepared fresh in small batches using roasted whole spices, mustard oil, and authentic family recipes.
+        Prepared fresh using freshly ground panch phoron, Kasundi mustard, ghee, and authentic family recipes from West Bengal, India.
       </p>
     </div>
 
     <div class="grid sm:grid-cols-3 gap-6">
       <div class="p-6 rounded-2xl bg-amber-50/60 border border-amber-100">
-        <h3 class="font-bold text-lg text-gray-900 mb-2">Royal Biryanis & Polao</h3>
+        <h3 class="font-bold text-lg text-gray-900 mb-2">Kolkata Biryani & Basanti Polao</h3>
         <p class="text-sm text-gray-600">
-          Fragrant Chinigura and saffron basmati rice slow-cooked with tender marinated meats, boiled eggs, and house-made borhani.
+          Subtly spiced saffron dum biryani with tender chicken or mutton and golden potatoes, alongside sweet-savory cashew-raisin polao.
         </p>
       </div>
       <div class="p-6 rounded-2xl bg-amber-50/60 border border-amber-100">
-        <h3 class="font-bold text-lg text-gray-900 mb-2">Traditional Bhuna & Bhorta</h3>
+        <h3 class="font-bold text-lg text-gray-900 mb-2">Kosha Mangsho & Shorshe Maach</h3>
         <p class="text-sm text-gray-600">
-          Slow-simmered Kosha Mangsho, mustard-infused fish curries, and smoky hand-mashed Bengali bhortas.
+          Slow-caramelized mutton curry, classic Kolkata Fish Fry with Kasundi, and pungent mustard-simmered fish delicacies.
         </p>
       </div>
       <div class="p-6 rounded-2xl bg-amber-50/60 border border-amber-100">
-        <h3 class="font-bold text-lg text-gray-900 mb-2">Festive Mishti & Pitha</h3>
+        <h3 class="font-bold text-lg text-gray-900 mb-2">Luchi-Aloor Dom & Kolkata Mishti</h3>
         <p class="text-sm text-gray-600">
-          Classic Bengali desserts including Mishti Doi, Roshogolla, Chomchom, and seasonal winter Pitha platters.
+          Fluffy puffed luchi with cholar dal, followed by soft Roshogolla, baked Mishti Doi, and artisanal Sandesh.
         </p>
       </div>
     </div>
   </section>
 
-  <!-- Latest Events Section (Auto-populated from Pages CMS) -->
+  <!-- Latest Events Section -->
   <section class="bg-stone-50 border-y border-stone-200/70 py-16">
     <div class="max-w-6xl mx-auto px-4">
       <div class="flex flex-wrap items-end justify-between gap-4 mb-10">
@@ -198,13 +200,13 @@ const featuredDishes = menuData.dishes.filter((d) => d.available !== false).slic
     </div>
   </section>
 
-  <!-- Sample Bengali Menu Preview + Combo CTA -->
+  <!-- Sample Menu Preview + Combo CTA -->
   <section class="max-w-6xl mx-auto px-4 py-16">
     <div class="text-center max-w-2xl mx-auto mb-10">
       <span class="text-xs font-bold uppercase tracking-widest text-amber-700">Catering & Combos</span>
-      <h2 class="text-3xl font-bold text-gray-900 mt-1">Popular Menu Selections</h2>
+      <h2 class="text-3xl font-bold text-gray-900 mt-1">Signature West Bengal Selections</h2>
       <p class="text-gray-600 mt-2 text-sm">
-        Customize your own combination and calculate exact pricing for birthdays, Dawats, and corporate lunches.
+        Customize your own combination and calculate exact pricing for birthdays, Puja gatherings, and corporate lunches.
       </p>
     </div>
 

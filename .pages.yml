@@ -130,21 +130,83 @@ content:
             label: Available
             type: boolean
             default: true
-  - name: publish
-    label: Publish Website Updates
+
+# About Us Page Content
+  - name: about
+    label: About Us Page
     type: file
-    path: trigger-build.json
+    path: src/data/about.json
     fields:
-      - name: last_published
-        label: Last Published Date & Time
-        type: date
-        options:
-          time: true
-        required: true
-      - name: release_note
-        label: Update Note (e.g., Added new weekend menu)
+      - name: badge
+        label: Top Small Label
         type: string
-        default: Menu and event updates
+        default: Our Story
+      - name: headline
+        label: Main Headline
+        type: string
+        required: true
+      - name: intro
+        label: Intro Paragraph
+        type: text
+        required: true
+      - name: story_title
+        label: Story Section Heading
+        type: string
+        required: true
+      - name: story_body
+        label: Kitchen Story
+        type: text
+        required: true
+      - name: standards_title
+        label: Kitchen Standards Heading
+        type: string
+        default: Our Kitchen Standards
+      - name: standards
+        label: Kitchen Standards List
+        type: object
+        list: true
+        fields:
+          - name: title
+            label: Highlight Title (e.g. Strictly No Beef & No Pork)
+            type: string
+            required: true
+          - name: description
+            label: Short Description
+            type: string
+            required: true
+
+  # Photo Gallery (Auto-compressed to WebP on build)
+  - name: gallery
+    label: Food & Event Gallery
+    type: file
+    path: src/data/gallery.json
+    fields:
+      - name: photos
+        label: Gallery Photos
+        type: object
+        list: true
+        fields:
+          - name: image
+            label: Photo
+            type: image
+            options:
+              input: src/assets/gallery
+              output: /src/assets/gallery
+            required: true
+          - name: caption
+            label: Dish or Event Caption
+            type: string
+            required: true
+          - name: category
+            label: Category
+            type: select
+            options:
+              values:
+                - Signature Dishes
+                - Catering & Buffets
+                - Pop-Up Events
+                - Sweets & Desserts   
+
   - name: settings
     label: Kitchen Contact & Hours
     type: file
@@ -169,3 +231,20 @@ content:
       - name: banner_notice
         label: Top Announcement Bar (Leave empty to hide)
         type: string
+  
+  # About Us Page Content
+  - name: publish
+    label: Publish Website Updates
+    type: file
+    path: trigger-build.json
+    fields:
+      - name: last_published
+        label: Last Published Date & Time
+        type: date
+        options:
+          time: true
+        required: true
+      - name: release_note
+        label: Update Note (e.g., Added new weekend menu)
+        type: string
+        default: Menu and event updates

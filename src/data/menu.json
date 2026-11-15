@@ -3,101 +3,101 @@
   "min_guests": 10,
   "packages": [
     {
-      "id": "dawat-2-course",
-      "name": "Bengali Dawat (2-Course)",
-      "description": "Choice of Starter/Bhorta + Signature Main Dish",
+      "id": "bengali-bhoj-2",
+      "name": "Kolkata Bhoj (2-Course)",
+      "description": "Choice of Telebhaja/Starter + Signature Main Dish",
       "price_per_person": 195
     },
     {
       "id": "royal-3-course",
-      "name": "Royal Feast (3-Course)",
-      "description": "Starter + Signature Main + Traditional Mishti Dessert",
+      "name": "Royal Bengali Feast (3-Course)",
+      "description": "Starter + Signature Main + Authentic Kolkata Mishti",
       "price_per_person": 245
     },
     {
-      "id": "grand-buffet",
-      "name": "Grand Celebration Buffet",
-      "description": "Multi-dish Bengali banquet spread for weddings & parties",
+      "id": "grand-utshob-buffet",
+      "name": "Grand Utshob Buffet",
+      "description": "Multi-dish West Bengal celebration spread for weddings, Pujas & parties",
       "price_per_person": 310
     }
   ],
   "dishes": [
     {
-      "name": "Shingara & Vegetable Chop Platter",
+      "name": "Kolkata Telebhaja & Vegetable Chop Platter",
       "category": "Starters",
-      "description": "Crispy Bengali spiced potato pastry & beetroot-vegetable croquettes with tamarind chutney",
+      "description": "Crispy beetroot-vegetable chops & beguni served with Kasundi (Bengali mustard) & chutney",
       "extra_price": 0,
-      "dietary": ["Vegetarian", "Halal"],
+      "dietary": ["Vegetarian", "Vegan"],
       "photo": "",
       "available": true
     },
     {
-      "name": "Traditional Bhorta Trio (Aloo, Begun, Shutki/Dal)",
+      "name": "Fish Fry (Kolkata Bhetki Style)",
       "category": "Starters",
-      "description": "Classic hand-mashed Bengali specialties seasoned with mustard oil, roasted chili & cilantro",
-      "extra_price": 15,
-      "dietary": ["Gluten-Free", "Halal"],
+      "description": "Herb-marinated white fish fillet crumb-fried golden, served with Kasundi & salad",
+      "extra_price": 25,
+      "dietary": ["Halal"],
       "photo": "",
       "available": true
     },
     {
-      "name": "Dhakai Kacchi Biryani",
+      "name": "Kolkata Dum Biryani (Chicken or Mutton)",
       "category": "Mains",
-      "description": "Slow-cooked aromatic Chinigura rice layered with marinated meat, potatoes & boiled egg",
-      "extra_price": 30,
-      "dietary": ["Halal", "Gluten-Free"],
-      "photo": "",
-      "available": true
-    },
-    {
-      "name": "Chicken Roast (Biye Bari Style)",
-      "category": "Mains",
-      "description": "Festive Bengali braised chicken in rich caramelized onion, yogurt & mild aromatic spice gravy",
-      "extra_price": 0,
-      "dietary": ["Halal", "Gluten-Free"],
-      "photo": "",
-      "available": true
-    },
-    {
-      "name": "Kosha Mangsho (Slow-Cooked Beef/Lamb Bhuna)",
-      "category": "Mains",
-      "description": "Rich, dark roasted spice curry slow-cooked to tender perfection",
+      "description": "Fragrant long-grain rice layered with saffron, caramelized onions, boiled egg & signature Kolkata spiced potato",
       "extra_price": 25,
       "dietary": ["Halal", "Gluten-Free"],
       "photo": "",
       "available": true
     },
     {
-      "name": "Shorshe Ilish / Mustard Fish Curry",
+      "name": "Kosha Mangsho (Slow-Cooked Mutton)",
       "category": "Mains",
-      "description": "Traditional Bengali fish simmered in pungent yellow & black mustard paste with green chilies",
-      "extra_price": 35,
+      "description": "Classic Kolkata-style tender goat/mutton slow-simmered in dark roasted spices & mustard oil",
+      "extra_price": 30,
       "dietary": ["Halal", "Gluten-Free"],
       "photo": "",
       "available": true
     },
     {
-      "name": "Chana Dal & Paneer Tarkari",
+      "name": "Chicken Dakbunglow / Rezala",
       "category": "Mains",
-      "description": "Bengal gram lentils cooked with golden paneer cubes, cumin & ginger",
+      "description": "Heritage Kolkata chicken curry in a velvety cashew-yogurt & aromatic whole-spice gravy",
       "extra_price": 0,
-      "dietary": ["Vegetarian", "Gluten-Free"],
+      "dietary": ["Halal", "Gluten-Free"],
       "photo": "",
       "available": true
     },
     {
-      "name": "Saffron Peas Polao & Luchi",
+      "name": "Shorshe Maach (Mustard Fish Curry)",
+      "category": "Mains",
+      "description": "Fresh fish simmered in traditional West Bengal yellow & black mustard paste with green chilies",
+      "extra_price": 30,
+      "dietary": ["Halal", "Gluten-Free"],
+      "photo": "",
+      "available": true
+    },
+    {
+      "name": "Cholar Dal & Aloor Dom",
+      "category": "Mains",
+      "description": "Sweet-spiced Bengal gram lentils with coconut slivers paired with baby potatoes in ginger-cumin gravy",
+      "extra_price": 0,
+      "dietary": ["Vegetarian", "Vegan", "Gluten-Free"],
+      "photo": "",
+      "available": true
+    },
+    {
+      "name": "Basanti Polao & Luchi Basket",
       "category": "Sides",
-      "description": "Fragrant ghee-roasted Chinigura polao served alongside fluffy puffed luchi bread",
+      "description": "Aromatic sweet-savory saffron Gobindobhog/cashew-raisin polao paired with fluffy golden luchi",
       "extra_price": 15,
-      "dietary": ["Vegetarian", "Halal"],
+      "dietary": ["Vegetarian"],
       "photo": "",
       "available": true
     },
     {
-      "name": "Mishti Doi & Roshogolla Duo",
+      "name": "Roshogolla, Mishti Doi & Sandesh Platter",
       "category": "Desserts",
-      "description": "Caramelized Bengali sweet yogurt paired with soft syrup-soaked cottage cheese dumplings",
+      "description": "Authentic West Bengal chhena sweets & caramelized baked sweet yogurt",
       "extra_price": 0,
       "dietary": ["Vegetarian", "Gluten-Free"],
       "photo": "",

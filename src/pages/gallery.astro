@@ -1,53 +1,70 @@
 ---
-import Layout from "~/layouts/Layout.astro";
-import Section from "~/components/Section.astro";
-import Heading from "~/components/Heading.astro";
-import { Picture } from "astro:assets";
-import { getCollection } from "astro:content";
+import { Image } from 'astro:assets';
+import Layout from '../layouts/Layout.astro';
+import galleryData from '../data/gallery.json';
+import settings from '../data/settings.json';
 
-const gallery = await getCollection("gallery");
+// Load all images in src/assets/gallery/ for automatic WebP compression
+const imageModules = import.meta.glob<{ default: ImageMetadata }>(
+  '/src/assets/gallery/*.{jpeg,jpg,png,webp,JPG,JPEG,PNG}',
+  { eager: true }
+);
+
+const photos = (galleryData.photos || [])
+  .map((item: any) => ({
+    ...item,
+    resolvedImage: imageModules[item.image]?.default,
+  }))
+  .filter((item: any) => item.resolvedImage);
 ---
 
-<Layout>
-	<Section class:list={"[&>.container]:pb-0"}>
-		<Heading>
-			<h1 slot="heading-title" class="font-black text-brand-green h2">Gallery</h1>
-			<p slot="heading-content">
-				Get a feel of our restaurant and food through our gallery. We promise a memorable culinary experience.
-			</p>
-		</Heading>
-	</Section>
-	<div class="masonry-grid grid grid-cols-2 lg:grid-cols-3">
-		{
-			gallery.map((item, index) => (
-				<div class="masonry-grid-item">
-					<a href={item.data.image.src} class="glightbox">
-						<Picture
-							src={item.data.image}
-							alt={item.data.alt}
-							class="h-full w-full object-cover object-center"
-							loading={index < 3 ? "eager" : "lazy"}
-                            fetchpriority={index < 3 ? "high" : "auto"}
-							width={675}
-							height={532}
-						/>
-					</a>
-				</div>
-			))
-		}
-	</div>
+<Layout title={`Gallery | ${settings.business_name}`}>
+  <section class="max-w-6xl mx-auto px-4 py-16">
+    <div class="text-center max-w-2xl mx-auto mb-12">
+      <span class="text-xs font-bold uppercase tracking-widest text-amber-700">Visual Feast</span>
+      <h1 class="text-4xl font-bold text-gray-900 mt-1">Food & Event Gallery</h1>
+      <p class="text-gray-600 mt-2 text-sm">
+        A glimpse into our West Bengal delicacies, festive catering spreads, and Stockholm pop-up events.
+      </p>
+    </div>
+
+    {photos.length === 0 ? (
+      <div class="text-center py-12 bg-amber-50/60 rounded-2xl border border-amber-100">
+        <p class="text-gray-700 font-medium">Gallery photos coming soon!</p>
+        <a
+          href={settings.facebook_url}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-block mt-2 text-sm font-semibold text-amber-800 hover:underline"
+        >
+          See our latest food photos on Facebook →
+        </a>
+      </div>
+    ) : (
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {photos.map((photo: any) => (
+          <figure class="group bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+            <div class="aspect-[4/3] overflow-hidden bg-gray-100">
+              <Image
+                src={photo.resolvedImage}
+                alt={photo.caption}
+                width={800}
+                quality={82}
+                format="webp"
+                class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+              />
+            </div>
+            <figcaption class="p-4 flex items-center justify-between gap-2">
+              <span class="font-semibold text-sm text-gray-900">{photo.caption}</span>
+              {photo.category && (
+                <span class="text-[11px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 shrink-0">
+                  {photo.category}
+                </span>
+              )}
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+    )}
+  </section>
 </Layout>
-
-<script>
-	import GLightbox from "glightbox";
-	import "../../node_modules/glightbox/dist/css/glightbox.min.css";
-
-	document.addEventListener("astro:page-load", () => {
-		const lightbox = GLightbox({
-			touchNavigation: true,
-			autoplayVideos: true,
-			loop: true,
-			draggable: true,
-		});
-	});
-</script>
