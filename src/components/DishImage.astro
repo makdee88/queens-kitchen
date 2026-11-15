@@ -23,47 +23,88 @@ const wikiQuery = hasCustomPhoto ? '' : getWikimediaQuery(dish);
   referrerpolicy="no-referrer"
   data-wiki-query={wikiQuery}
   onerror={`this.onerror=null; this.src='${FALLBACK_DISH_IMAGE}';`}
-  class={className}
+  class={`${className} transition-opacity duration-300`}
 />
 
 <script>
-  // Runs once per page load to resolve Wikimedia Commons URLs for dishes without a custom CMS photo
-  const wikiImages = document.querySelectorAll<HTMLImageElement>('img[data-wiki-query]:not([data-wiki-query=""])');
+  const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
-  wikiImages.forEach(async (img) => {
-    const query = img.dataset.wikiQuery;
-    if (!query) return;
-
-    const cacheKey = `qk_wiki_${query.toLowerCase()}`;
-    const cachedUrl = sessionStorage.getItem(cacheKey);
-    if (cachedUrl) {
-      img.src = cachedUrl;
-      return;
-    }
-
+  function getCachedWikiUrl(key: string): string | null {
     try {
-      const apiUrl =
-        `https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*` +
-        `&generator=search&gsrnamespace=6&gsrlimit=5&gsrsearch=${encodeURIComponent(query)}` +
-        `&prop=imageinfo&iiprop=url|mime&iiurlwidth=640`;
-
-      const res = await fetch(apiUrl);
-      if (!res.ok) return;
-
-      const data = await res.json();
-      const pages = Object.values(data?.query?.pages || {}) as any[];
-      const match = pages.find((p) => {
-        const mime = p?.imageinfo?.[0]?.mime || '';
-        return mime === 'image/jpeg' || mime === 'image/png' || mime === 'image/webp';
-      });
-
-      const resolvedUrl = match?.imageinfo?.[0]?.thumburl || match?.imageinfo?.[0]?.url;
-      if (resolvedUrl) {
-        sessionStorage.setItem(cacheKey, resolvedUrl);
-        img.src = resolvedUrl;
+      const raw = localStorage.getItem(key);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (Date.now() - parsed.ts > CACHE_TTL_MS) {
+        localStorage.removeItem(key);
+        return null;
       }
+      return parsed.url;
     } catch {
-      // Silently keep /images/fallback-dish.jpg on network error
+      return null;
     }
-  });
+  }
+
+  function setCachedWikiUrl(key: string, url: string) {
+    try {
+      localStorage.setItem(key, JSON.stringify({ url, ts: Date.now() }));
+    } catch {
+      // Ignore storage quota errors
+    }
+  }
+
+  async function resolveAllDishImages() {
+    const images = document.querySelectorAll<HTMLImageElement>(
+      'img[data-wiki-query]:not([data-wiki-query=""])'
+    );
+
+    // Group images by identical query so we never fetch the same query twice
+    const byQuery = new Map<string, HTMLImageElement[]>();
+    images.forEach((img) => {
+      const q = img.dataset.wikiQuery?.trim();
+      if (!q) return;
+      const list = byQuery.get(q) || [];
+      list.push(img);
+      byQuery.set(q, list);
+    });
+
+    for (const [query, imgList] of byQuery.entries()) {
+      const cacheKey = `qk_wiki_v2_${query.toLowerCase()}`;
+      const cached = getCachedWikiUrl(cacheKey);
+      if (cached) {
+        imgList.forEach((img) => (img.src = cached));
+        continue;
+      }
+
+      try {
+        const apiUrl =
+          `https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*` +
+          `&generator=search&gsrnamespace=6&gsrlimit=5&gsrsearch=${encodeURIComponent(query)}` +
+          `&prop=imageinfo&iiprop=url|mime&iiurlwidth=640`;
+
+        const res = await fetch(apiUrl);
+        if (!res.ok) continue;
+
+        const data = await res.json();
+        const pages = Object.values(data?.query?.pages || {}) as any[];
+        const match = pages.find((p) => {
+          const mime = p?.imageinfo?.[0]?.mime || '';
+          return mime === 'image/jpeg' || mime === 'image/png' || mime === 'image/webp';
+        });
+
+        const resolvedUrl = match?.imageinfo?.[0]?.thumburl || match?.imageinfo?.[0]?.url;
+        if (resolvedUrl) {
+          setCachedWikiUrl(cacheKey, resolvedUrl);
+          imgList.forEach((img) => (img.src = resolvedUrl));
+        }
+      } catch {
+        // Keep fallback image if offline
+      }
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', resolveAllDishImages);
+  } else {
+    resolveAllDishImages();
+  }
 </script>
