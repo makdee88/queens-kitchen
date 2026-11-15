@@ -1,44 +1,36 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import aboutData from '../data/about.json';
 import settings from '../data/settings.json';
 ---
 
 <Layout title={`About Us | ${settings.business_name}`}>
   <section class="max-w-4xl mx-auto px-4 py-16 space-y-12">
     <div class="text-center space-y-4">
-      <span class="text-xs font-bold uppercase tracking-widest text-amber-700">Our Story</span>
-      <h1 class="text-4xl font-extrabold text-gray-900">Bringing the Soul of West Bengal to Stockholm</h1>
-      <p class="text-lg text-gray-600 max-w-2xl mx-auto">
-        Queen's Kitchen was born from a passion for sharing authentic, home-style Bengali cuisine rooted in the rich culinary traditions of Kolkata and West Bengal, India.
-      </p>
+      <span class="text-xs font-bold uppercase tracking-widest text-amber-700">{aboutData.badge}</span>
+      <h1 class="text-4xl font-extrabold text-gray-900">{aboutData.headline}</h1>
+      <p class="text-lg text-gray-600 max-w-2xl mx-auto">{aboutData.intro}</p>
     </div>
 
     <div class="grid md:grid-cols-2 gap-8 items-center bg-amber-50/60 p-8 rounded-3xl border border-amber-100">
       <div class="space-y-4">
-        <h2 class="text-2xl font-bold text-gray-900">Heritage Recipes, Freshly Prepared</h2>
-        <p class="text-sm text-gray-700 leading-relaxed">
-          West Bengal's cuisine is celebrated for its delicate balance of aromatic spices, mustard oil, poppy seeds (posto), freshly roasted panch phoron, and signature sweets. Every dish at Queen's Kitchen is cooked from scratch in small batches — never mass-produced.
-        </p>
-        <p class="text-sm text-gray-700 leading-relaxed">
-          Whether you are hosting an intimate family gathering, a birthday celebration, a Puja feast, or a corporate lunch in Stockholm, we tailor every menu to your guests' preferences.
-        </p>
+        <h2 class="text-2xl font-bold text-gray-900">{aboutData.story_title}</h2>
+        {aboutData.story_body.split('\n\n').map((paragraph: string) => (
+          <p class="text-sm text-gray-700 leading-relaxed">{paragraph}</p>
+        ))}
       </div>
 
       <div class="bg-white p-6 rounded-2xl border border-amber-200/70 space-y-4 shadow-sm">
-        <h3 class="font-bold text-gray-900 text-lg">Our Kitchen Standards</h3>
+        <h3 class="font-bold text-gray-900 text-lg">{aboutData.standards_title}</h3>
         <ul class="space-y-3 text-sm text-gray-700">
-          <li class="flex items-start gap-2.5">
-            <span class="text-emerald-600 font-bold">✓</span>
-            <span><strong>Strictly No Beef & No Pork:</strong> Our kitchen never cooks or handles beef or pork products.</span>
-          </li>
-          <li class="flex items-start gap-2.5">
-            <span class="text-emerald-600 font-bold">✓</span>
-            <span><strong>Authentic West Bengal Flavors:</strong> Classic Kolkata Dum Biryani, Kosha Mangsho (mutton), Shorshe Maach, Cholar Dal & Mishti.</span>
-          </li>
-          <li class="flex items-start gap-2.5">
-            <span class="text-emerald-600 font-bold">✓</span>
-            <span><strong>Dietary Friendly:</strong> Dedicated vegetarian, vegan, gluten-free, and halal-certified meat options available.</span>
-          </li>
+          {aboutData.standards.map((item: any) => (
+            <li class="flex items-start gap-2.5">
+              <span class="text-emerald-600 font-bold">✓</span>
+              <span>
+                <strong>{item.title}:</strong> {item.description}
+              </span>
+            </li>
+          ))}
         </ul>
       </div>
     </div>
