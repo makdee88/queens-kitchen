@@ -3,18 +3,15 @@ media:
   output: /images/uploads
 
 content:
+  # 1. Upcoming Events & Pop-Ups
   - name: events
     label: Upcoming Events
     type: collection
     path: src/content/events
-    filename: "{year}-{month}-{day}-{primary}.md"
     view:
-      fields: [title, event_date, active]
+      fields: [title, event_date, location, active]
       primary: title
       sort: [event_date]
-      default:
-        sort: event_date
-        order: desc
     fields:
       - name: title
         label: Event Title
@@ -27,63 +24,62 @@ content:
           time: true
         required: true
       - name: location
-        label: Location / Venue
+        label: Venue / Location
         type: string
-        default: Queen's Kitchen
+        required: true
       - name: banner
-        label: Event Poster / Photo
+        label: Event Poster / Banner Image
         type: image
+      - name: price_note
+        label: Ticket or Plate Price Info (Optional)
+        type: string
+      - name: rsvp_link
+        label: Facebook Event or RSVP Link (Optional)
+        type: string
       - name: active
         label: Show on Website
         type: boolean
         default: true
-      - name: price_note
-        label: Ticket or Entry Note (Optional)
-        type: string
       - name: body
-        label: Event Details
+        label: Event Description & Menu Highlights
         type: rich-text
+
+  # 2. Catering Packages & Custom Menu Items
   - name: menu
     label: Menu & Combo Builder
     type: file
     path: src/data/menu.json
     fields:
       - name: currency
-        label: Currency Symbol
+        label: Currency
         type: string
         default: SEK
-        required: true
       - name: min_guests
-        label: Minimum Guests for Combo Orders
+        label: Minimum Guests
         type: number
-        options:
-          min: 1
         default: 10
-        required: true
       - name: packages
         label: Base Combo Packages
         type: object
         list: true
         fields:
           - name: id
-            label: Package ID (e.g. 2-course, 3-course)
+            label: Package ID (unique, lowercase, no spaces)
             type: string
             required: true
           - name: name
-            label: Package Name
+            label: Package Name (e.g., Maharaja Thali)
             type: string
             required: true
           - name: description
-            label: Short Description (e.g. Pick 1 Starter, 2 Mains, 1 Dessert)
+            label: Package Summary
             type: string
           - name: price_per_person
-            label: Base Price per Person
+            label: Base Price Per Person
             type: number
-            options:
-              min: 0
             required: true
       - name: dishes
-        label: Menu Dishes
+        label: Available Dishes
         type: object
         list: true
         fields:
@@ -105,15 +101,12 @@ content:
                 - Bengali Desserts
             required: true
           - name: description
-            label: Ingredients / Allergens
+            label: Short Description
             type: string
           - name: extra_price
-            label: Extra Cost per Person (+0 for standard included dish)
+            label: Extra Price Per Person (0 if included in base)
             type: number
-            options:
-              min: 0
             default: 0
-            required: true
           - name: dietary
             label: Dietary Tags
             type: select
@@ -122,17 +115,47 @@ content:
               values:
                 - Vegetarian
                 - Vegan
-                - Gluten-Free
                 - Halal
+                - Gluten-Free
                 - Spicy
           - name: photo
-            label: Dish Photo (Optional)
+            label: Dish Photo (Leave blank for default photo)
             type: image
           - name: available
-            label: Available
+            label: Available for Ordering
             type: boolean
             default: true
-# About Us Page Content
+
+  # 3. Food & Event Gallery
+  - name: gallery
+    label: Food & Event Gallery
+    type: file
+    path: src/data/kitchen-gallery.json
+    fields:
+      - name: photos
+        label: Gallery Photos
+        type: object
+        list: true
+        fields:
+          - name: image
+            label: Photo
+            type: image
+            required: true
+          - name: caption
+            label: Dish or Event Caption
+            type: string
+            required: true
+          - name: category
+            label: Category
+            type: select
+            options:
+              values:
+                - Signature Dishes
+                - Catering & Buffets
+                - Pop-Up Events
+                - Sweets & Desserts
+
+  # 4. About Us Page
   - name: about
     label: About Us Page
     type: file
@@ -168,7 +191,7 @@ content:
         list: true
         fields:
           - name: title
-            label: Highlight Title (e.g. Strictly No Beef & No Pork)
+            label: Highlight Title
             type: string
             required: true
           - name: description
@@ -176,35 +199,7 @@ content:
             type: string
             required: true
 
-  # Photo Gallery (Auto-compressed to WebP on build)
-  - name: gallery
-    label: Food & Event Gallery
-    type: file
-    path: src/data/kitchen-gallery.json
-    fields:
-      - name: photos
-        label: Gallery Photos
-        type: object
-        list: true
-        fields:
-          - name: image
-            label: Photo
-            type: image
-            required: true
-          - name: caption
-            label: Dish or Event Caption
-            type: string
-            required: true
-          - name: category
-            label: Category
-            type: select
-            options:
-              values:
-                - Signature Dishes
-                - Catering & Buffets
-                - Pop-Up Events
-                - Sweets & Desserts  
-
+  # 5. Kitchen Contact & Site Settings
   - name: settings
     label: Kitchen Contact & Hours
     type: file
@@ -213,24 +208,26 @@ content:
       - name: business_name
         label: Kitchen Name
         type: string
-        default: Queen's Kitchen
-        required: true
-      - name: phone
-        label: Contact Phone / WhatsApp
+      - name: tagline
+        label: Hero Tagline
         type: string
-        required: true
+      - name: phone
+        label: WhatsApp / Phone Number
+        type: string
       - name: email
         label: Order Notification Email
         type: string
-        required: true
+      - name: facebook_url
+        label: Facebook Page URL
+        type: string
       - name: address
-        label: Kitchen Address / Pickup Point
+        label: Pickup / Kitchen Area
         type: string
       - name: banner_notice
-        label: Top Announcement Bar (Leave empty to hide)
+        label: Top Announcement Banner (leave blank to hide)
         type: string
-  
-  # About Us Page Content
+
+  # 6. Manual Website Publish Trigger
   - name: publish
     label: Publish Website Updates
     type: file
@@ -243,6 +240,6 @@ content:
           time: true
         required: true
       - name: release_note
-        label: Update Note (e.g., Added new weekend menu)
+        label: Update Note
         type: string
         default: Menu and event updates
