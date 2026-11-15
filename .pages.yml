@@ -156,3 +156,20 @@ content:
       - name: banner_notice
         label: Top Announcement Bar (Leave empty to hide)
         type: string
+
+# 4. Manual Website Publish Trigger (Updates trigger-build to start Cloudflare build)
+  - name: publish
+    label: Publish Website Updates
+    type: file
+    path: trigger-build.json
+    fields:
+      - name: last_published
+        label: Last Published Date & Time
+        type: date
+        options:
+          time: true
+        required: true
+      - name: release_note
+        label: Update Note (e.g., Added new weekend menu)
+        type: string
+        default: Menu and event updates
