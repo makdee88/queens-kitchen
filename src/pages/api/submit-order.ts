@@ -1,5 +1,35 @@
-export async function onRequestPost(context) {
-  const { request, env } = context;
+import type { APIRoute } from 'astro';
+
+export const GET: APIRoute = async ({ locals }) => {
+  const env = (locals as any)?.runtime?.env || {};
+  let dbStatus = 'not_bound';
+
+  if (env.DB) {
+    try {
+      const row = await env.DB.prepare(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='leads'"
+      ).first();
+      dbStatus = row ? 'leads_table_ok' : 'leads_table_missing';
+    } catch (e: any) {
+      dbStatus = `error: ${e?.message}`;
+    }
+  }
+
+  return new Response(
+    JSON.stringify({
+      status: 'active',
+      has_db: Boolean(env.DB),
+      db_status: dbStatus,
+      has_sheets_webhook: Boolean(env.SHEETS_WEBHOOK_URL),
+    }),
+    { status: 200, headers: { 'Content-Type': 'application/json' } }
+  );
+};
+
+export const prerender = false;
+
+export const POST: APIRoute = async ({ request, locals }) => {
+  const env = (locals as any)?.runtime?.env || {};
 
   try {
     const data = await request.json();
@@ -13,14 +43,13 @@ export async function onRequestPost(context) {
 
     const dishesSummary = Array.isArray(data.selected_dishes)
       ? data.selected_dishes
-          .map((d) => (Number(d.extra_price) > 0 ? `${d.name} (+${d.extra_price})` : d.name))
+          .map((d: any) => (Number(d.extra_price) > 0 ? `${d.name} (+${d.extra_price})` : d.name))
           .join(', ')
       : '';
 
     const notesText = String(data.notes || '').trim();
     const formattedTotal = `${Number(data.total_price || 0)} ${data.currency || 'SEK'}`;
 
-    // 1. Primary Safe Storage: Insert into Cloudflare D1 (binding name: DB)
     if (env.DB) {
       await env.DB.prepare(
         `INSERT INTO leads (name, email, phone, event_date, guests, package_name, selected_dishes, total_price, notes)
@@ -40,7 +69,6 @@ export async function onRequestPost(context) {
         .run();
     }
 
-    // 2. Mirror Copy to Google Sheets Apps Script Webhook
     if (env.SHEETS_WEBHOOK_URL) {
       try {
         await fetch(env.SHEETS_WEBHOOK_URL, {
@@ -69,11 +97,10 @@ export async function onRequestPost(context) {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
-  } catch (err) {
-    console.error('Submit order error:', err);
-    return new Response(JSON.stringify({ error: 'Server error saving lead.' }), {
+  } catch (err: any) {
+    return new Response(JSON.stringify({ error: err?.message || 'Server error saving lead.' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     });
   }
-}
+};
