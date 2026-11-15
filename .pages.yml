@@ -179,7 +179,7 @@ content:
   - name: gallery
     label: Food & Event Gallery
     type: file
-    path: src/data/gallery.json
+    path: src/data/kitchen-gallery.json
     fields:
       - name: photos
         label: Gallery Photos
