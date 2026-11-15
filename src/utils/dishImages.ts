@@ -1,78 +1,117 @@
-// Direct Wikimedia Commons upload.wikimedia.org CDN thumbnails (CC-BY-SA / Public Domain)
-const DISH_FALLBACKS: Record<string, string> = {
-  'Kolkata Vegetable Chop & Beguni Platter':
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Beguni_-_Kolkata_2011-08-18_4826.JPG/640px-Beguni_-_Kolkata_2011-08-18_4826.JPG',
-  'Kolkata Bhetki Fish Fry':
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/8/86/Fish_fry_Kolkata.jpg/640px-Fish_fry_Kolkata.jpg',
-  'Kolkata Dum Biryani (Chicken or Mutton)':
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/%22Hyderabadi_Dum_Biryani%22.jpg/640px-%22Hyderabadi_Dum_Biryani%22.jpg',
-  'Basanti Polao':
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Basanti_Pulao_and_Kosha_Mangsho.jpg/640px-Basanti_Pulao_and_Kosha_Mangsho.jpg',
-  'Chicken Chaanp':
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Chicken_chap.jpg/640px-Chicken_chap.jpg',
-  'Kosha Mangsho (Slow-Cooked Mutton)':
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Basanti_Pulao_and_Kosha_Mangsho.jpg/640px-Basanti_Pulao_and_Kosha_Mangsho.jpg',
-  'Chicken Rezala':
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Chicken_Rezala.jpg/640px-Chicken_Rezala.jpg',
-  'Shorshe Ilish / Mustard Fish Curry':
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/Shorshe_Ilish.jpg/640px-Shorshe_Ilish.jpg',
-  'Bhetki Paturi (Banana Leaf Steamed Fish)':
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Bhetki_fish_paturi.jpg/640px-Bhetki_fish_paturi.jpg',
-  'Doi Katla / Rui Kalia':
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Doi_Maach.jpg/640px-Doi_Maach.jpg',
-  'Cholar Dal & Aloor Dom':
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Luchi_Alur_Dom.jpg/640px-Luchi_Alur_Dom.jpg',
-  'Chanar Dalna (Bengali Cottage Cheese Curry)':
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Chhanar_Dalna.jpg/640px-Chhanar_Dalna.jpg',
-  'Luchi Basket (4 pcs per person)':
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Luchi_Alur_Dom.jpg/640px-Luchi_Alur_Dom.jpg',
-  'Aamer Chutney & Papad':
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Mango_chutney.jpg/640px-Mango_chutney.jpg',
-  'Rosogolla (2 pcs)':
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/2/28/Rasgulla_-_Howrah_2015-05-17_0549.JPG/640px-Rasgulla_-_Howrah_2015-05-17_0549.JPG',
-  'Kacha Golla / Makha Sandesh':
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Sandesh_-_Kolkata_2011-08-18_4818.JPG/640px-Sandesh_-_Kolkata_2011-08-18_4818.JPG',
-  'Baked Mishti Doi':
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Mishti_Doi.jpg/640px-Mishti_Doi.jpg',
+// Generates a clean, zero-dependency SVG culinary illustration per Bengali course
+// Automatically overridden whenever a real dish photo is uploaded in Pages CMS (`dish.photo`)
+
+interface CourseTheme {
+  bg: string;
+  accent: string;
+  secondary: string;
+  label: string;
+  icon: string;
+}
+
+const COURSE_THEMES: Record<string, CourseTheme> = {
+  Starters: {
+    bg: '#fef3c7',
+    accent: '#d97706',
+    secondary: '#92400e',
+    label: 'Kolkata Starter',
+    icon: `<ellipse cx="200" cy="155" rx="68" ry="34" fill="#f59e0b" opacity="0.25"/>
+           <path d="M150 155 Q175 115 200 155 Q225 115 250 155 Z" fill="#d97706"/>
+           <circle cx="180" cy="152" r="14" fill="#b45309"/>
+           <circle cx="220" cy="152" r="14" fill="#b45309"/>`,
+  },
+  'Biryani & Polao': {
+    bg: '#ffedd5',
+    accent: '#ea580c',
+    secondary: '#9a3412',
+    label: 'Royal Rice & Biryani',
+    icon: `<path d="M135 155 C135 190, 265 190, 265 155 Z" fill="#9a3412"/>
+           <path d="M142 155 Q200 105 258 155 Z" fill="#f59e0b"/>
+           <circle cx="190" cy="142" r="7" fill="#fef3c7"/>
+           <circle cx="215" cy="146" r="5" fill="#dc2626"/>`,
+  },
+  'Chicken & Mutton': {
+    bg: '#fee2e2',
+    accent: '#b91c1c',
+    secondary: '#7f1d1d',
+    label: 'Slow-Cooked Curry',
+    icon: `<path d="M140 150 C140 192, 260 192, 260 150 Z" fill="#7f1d1d"/>
+           <ellipse cx="200" cy="150" rx="56" ry="14" fill="#dc2626"/>
+           <circle cx="185" cy="148" r="9" fill="#fca5a5" opacity="0.6"/>
+           <circle cx="215" cy="149" r="7" fill="#fde047" opacity="0.7"/>`,
+  },
+  'Bengali Fish': {
+    bg: '#e0f2fe',
+    accent: '#0284c7',
+    secondary: '#075985',
+    label: 'Bengal Fish Delicacy',
+    icon: `<path d="M150 150 Q200 112 245 150 Q200 188 150 150 Z" fill="#0284c7"/>
+           <polygon points="242,150 265,132 265,168" fill="#0369a1"/>
+           <circle cx="172" cy="146" r="4" fill="#ffffff"/>`,
+  },
+  'Vegetarian Mains': {
+    bg: '#dcfce7',
+    accent: '#15803d',
+    secondary: '#14532d',
+    label: 'Pure Bengali Veg',
+    icon: `<path d="M145 155 C145 190, 255 190, 255 155 Z" fill="#15803d"/>
+           <path d="M200 148 C182 122, 165 135, 200 152 C235 135, 218 122, 200 148 Z" fill="#22c55e"/>`,
+  },
+  'Sides & Breads': {
+    bg: '#fef9c3',
+    accent: '#ca8a04',
+    secondary: '#854d0e',
+    label: 'Luchi & Accompaniments',
+    icon: `<ellipse cx="188" cy="154" rx="42" ry="22" fill="#eab308"/>
+           <ellipse cx="214" cy="146" rx="40" ry="20" fill="#facc15" stroke="#ca8a04" stroke-width="2"/>`,
+  },
+  'Bengali Desserts': {
+    bg: '#fce7f3',
+    accent: '#be185d',
+    secondary: '#831843',
+    label: 'Kolkata Mishti',
+    icon: `<path d="M148 158 C148 188, 252 188, 252 158 Z" fill="#be185d"/>
+           <circle cx="182" cy="150" r="16" fill="#fff1f2" stroke="#f43f5e" stroke-width="2"/>
+           <circle cx="218" cy="150" r="16" fill="#fff1f2" stroke="#f43f5e" stroke-width="2"/>`,
+  },
 };
 
-const CATEGORY_FALLBACKS: Record<string, string> = {
-  Starters:
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Beguni_-_Kolkata_2011-08-18_4826.JPG/640px-Beguni_-_Kolkata_2011-08-18_4826.JPG',
-  'Biryani & Polao':
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Basanti_Pulao_and_Kosha_Mangsho.jpg/640px-Basanti_Pulao_and_Kosha_Mangsho.jpg',
-  'Chicken & Mutton':
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Basanti_Pulao_and_Kosha_Mangsho.jpg/640px-Basanti_Pulao_and_Kosha_Mangsho.jpg',
-  'Bengali Fish':
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/Shorshe_Ilish.jpg/640px-Shorshe_Ilish.jpg',
-  'Vegetarian Mains':
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Luchi_Alur_Dom.jpg/640px-Luchi_Alur_Dom.jpg',
-  'Sides & Breads':
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Luchi_Alur_Dom.jpg/640px-Luchi_Alur_Dom.jpg',
-  'Bengali Desserts':
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/2/28/Rasgulla_-_Howrah_2015-05-17_0549.JPG/640px-Rasgulla_-_Howrah_2015-05-17_0549.JPG',
-};
+function buildCourseSvg(theme: CourseTheme, dishName: string): string {
+  // Strip apostrophes/quotes so data URI never breaks HTML attribute parsing
+  const safeTitle = dishName.replace(/['"&<>]/g, '').slice(0, 28);
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 400 300">
+    <rect width="400" height="300" fill="${theme.bg}"/>
+    <circle cx="200" cy="150" r="96" fill="#ffffff" stroke="${theme.accent}" stroke-width="5"/>
+    <circle cx="200" cy="150" r="80" fill="none" stroke="${theme.accent}" stroke-width="1.5" stroke-dasharray="5 5" opacity="0.6"/>
+    ${theme.icon}
+    <text x="200" y="212" text-anchor="middle" font-family="system-ui, sans-serif" font-weight="700" font-size="13" fill="${theme.secondary}">${safeTitle}</text>
+    <text x="200" y="268" text-anchor="middle" font-family="system-ui, sans-serif" font-weight="600" font-size="11" letter-spacing="1.5" fill="${theme.accent}">${theme.label.toUpperCase()}</text>
+  </svg>`;
 
-// Self-contained warm Bengali plate SVG fallback (zero external network dependency)
-export const DEFAULT_BENGALI_PLATE =
-  "data:image/svg+xml;utf8," +
-  encodeURIComponent(
-    `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
-      <rect width="400" height="300" fill="#fef3c7"/>
-      <circle cx="200" cy="150" r="88" fill="#ffffff" stroke="#d97706" stroke-width="6"/>
-      <circle cx="200" cy="150" r="68" fill="#fffbeb" stroke="#f59e0b" stroke-width="2" stroke-dasharray="6 4"/>
-      <text x="200" y="145" text-anchor="middle" font-family="sans-serif" font-weight="bold" font-size="16" fill="#92400e">Queen's Kitchen</text>
-      <text x="200" y="168" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#b45309">Authentic Bengali Dish</text>
-    </svg>`
-  );
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+}
+
+export const DEFAULT_BENGALI_PLATE = buildCourseSvg(
+  {
+    bg: '#fef3c7',
+    accent: '#d97706',
+    secondary: '#92400e',
+    label: "Queens Kitchen Stockholm",
+    icon: `<circle cx="200" cy="150" r="36" fill="#f59e0b" opacity="0.3"/>`,
+  },
+  'Authentic Bengali Cuisine'
+);
 
 export function getDishImage(dish: { name: string; category: string; photo?: string }): string {
   if (dish.photo && dish.photo.trim() !== '') {
     return dish.photo;
   }
-  return (
-    DISH_FALLBACKS[dish.name] ||
-    CATEGORY_FALLBACKS[dish.category] ||
-    DEFAULT_BENGALI_PLATE
-  );
+  const theme = COURSE_THEMES[dish.category] || {
+    bg: '#fef3c7',
+    accent: '#d97706',
+    secondary: '#92400e',
+    label: 'Bengali Specialty',
+    icon: `<circle cx="200" cy="150" r="34" fill="#f59e0b" opacity="0.3"/>`,
+  };
+  return buildCourseSvg(theme, dish.name);
 }
