@@ -27,7 +27,7 @@ const wikiQuery = hasCustomPhoto ? '' : getWikimediaQuery(dish);
 />
 
 <script>
-  const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+  const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
   function getCachedWikiUrl(key: string): string | null {
     try {
@@ -47,17 +47,15 @@ const wikiQuery = hasCustomPhoto ? '' : getWikimediaQuery(dish);
   function setCachedWikiUrl(key: string, url: string) {
     try {
       localStorage.setItem(key, JSON.stringify({ url, ts: Date.now() }));
-    } catch {
-      // Ignore storage quota errors
-    }
+    } catch {}
   }
 
   async function resolveAllDishImages() {
     const images = document.querySelectorAll<HTMLImageElement>(
       'img[data-wiki-query]:not([data-wiki-query=""])'
     );
+    if (images.length === 0) return;
 
-    // Group images by identical query so we never fetch the same query twice
     const byQuery = new Map<string, HTMLImageElement[]>();
     images.forEach((img) => {
       const q = img.dataset.wikiQuery?.trim();
@@ -71,7 +69,9 @@ const wikiQuery = hasCustomPhoto ? '' : getWikimediaQuery(dish);
       const cacheKey = `qk_wiki_v2_${query.toLowerCase()}`;
       const cached = getCachedWikiUrl(cacheKey);
       if (cached) {
-        imgList.forEach((img) => (img.src = cached));
+        imgList.forEach((img) => {
+          if (img.src !== cached) img.src = cached;
+        });
         continue;
       }
 
@@ -96,15 +96,13 @@ const wikiQuery = hasCustomPhoto ? '' : getWikimediaQuery(dish);
           setCachedWikiUrl(cacheKey, resolvedUrl);
           imgList.forEach((img) => (img.src = resolvedUrl));
         }
-      } catch {
-        // Keep fallback image if offline
-      }
+      } catch {}
     }
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', resolveAllDishImages);
-  } else {
+  // Fires on initial load AND every Astro client-side navigation
+  document.addEventListener('astro:page-load', resolveAllDishImages);
+  if (document.readyState !== 'loading') {
     resolveAllDishImages();
   }
 </script>
