@@ -1,21 +1,31 @@
 ---
 import { Image } from 'astro:assets';
 import Layout from '../layouts/Layout.astro';
-import galleryData from '../data/gallery.json';
+import galleryData from '../data/kitchen-gallery.json';
 import settings from '../data/settings.json';
 
-// Load all images in src/assets/gallery/ for automatic WebP compression
-const imageModules = import.meta.glob<{ default: ImageMetadata }>(
-  '/src/assets/gallery/*.{jpeg,jpg,png,webp,JPG,JPEG,PNG}',
+// Scan both public/images/uploads (Pages CMS default) and src/assets/gallery
+const assetModules = import.meta.glob<{ default: ImageMetadata }>(
+  ['/src/assets/gallery/*.{jpeg,jpg,png,webp,JPG,JPEG,PNG}', '/public/images/uploads/*.{jpeg,jpg,png,webp,JPG,JPEG,PNG}'],
   { eager: true }
 );
 
 const photos = (galleryData.photos || [])
-  .map((item: any) => ({
-    ...item,
-    resolvedImage: imageModules[item.image]?.default,
-  }))
-  .filter((item: any) => item.resolvedImage);
+  .map((item: any) => {
+    const rawPath = String(item.image || '').trim();
+    if (!rawPath) return null;
+
+    // Match either /src/assets/gallery/file.jpg or /public/images/uploads/file.jpg
+    const filename = rawPath.split('/').pop();
+    const matchedKey = Object.keys(assetModules).find((key) => key.endsWith(`/${filename}`));
+
+    return {
+      ...item,
+      resolvedImage: matchedKey ? assetModules[matchedKey].default : null,
+      fallbackUrl: rawPath.startsWith('/') ? rawPath : `/${rawPath}`,
+    };
+  })
+  .filter(Boolean);
 ---
 
 <Layout title={`Gallery | ${settings.business_name}`}>
@@ -45,14 +55,23 @@ const photos = (galleryData.photos || [])
         {photos.map((photo: any) => (
           <figure class="group bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
             <div class="aspect-[4/3] overflow-hidden bg-gray-100">
-              <Image
-                src={photo.resolvedImage}
-                alt={photo.caption}
-                width={800}
-                quality={82}
-                format="webp"
-                class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-              />
+              {photo.resolvedImage ? (
+                <Image
+                  src={photo.resolvedImage}
+                  alt={photo.caption}
+                  width={800}
+                  quality={82}
+                  format="webp"
+                  class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                />
+              ) : (
+                <img
+                  src={photo.fallbackUrl}
+                  alt={photo.caption}
+                  loading="lazy"
+                  class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                />
+              )}
             </div>
             <figcaption class="p-4 flex items-center justify-between gap-2">
               <span class="font-semibold text-sm text-gray-900">{photo.caption}</span>
