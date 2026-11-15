@@ -2,7 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import menuData from '../data/menu.json';
 import settings from '../data/settings.json';
-import { getDishImage, DEFAULT_BENGALI_PLATE } from '../utils/dishImages';
+import DishImage from '../components/DishImage.astro';
 
 const availableDishes = menuData.dishes.filter((d) => d.available !== false);
 const filterCategories = [
@@ -179,13 +179,9 @@ const filterCategories = [
                 :class={`isSelected(${JSON.stringify(dish.name)}) ? 'border-amber-600 bg-amber-50/60 ring-1 ring-amber-600/30' : 'border-gray-200 hover:border-gray-300'`}
                 class="cursor-pointer p-3 rounded-xl border transition flex items-center gap-3"
               >
-                <img
-                  src={getDishImage(dish)}
-                  alt={dish.name}
-                  loading="lazy"
-                  referrerpolicy="no-referrer"
-                  onerror="this.onerror=null; this.src='/images/wikimedia-cache/Bengali_thali_-_Kolkata.jpg';"
-                  class="w-12 h-12 rounded-lg object-cover shrink-0 bg-amber-100"
+                <DishImage
+                dish={dish}
+                class="w-12 h-12 rounded-lg object-cover shrink-0 bg-amber-100"
                 />
 
                 <div class="flex-1 min-w-0">

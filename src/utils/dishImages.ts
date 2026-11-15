@@ -1,44 +1,30 @@
-const DISH_SLUGS: Record<string, string> = {
-  'Kolkata Vegetable Chop & Beguni Platter': 'beguni',
-  'Kolkata Bhetki Fish Fry': 'fish-fry',
-  'Kolkata Dum Biryani (Chicken or Mutton)': 'kolkata-biryani',
-  'Basanti Polao': 'basanti-polao',
-  'Chicken Chaanp': 'chicken-chaap',
-  'Kosha Mangsho (Slow-Cooked Mutton)': 'kosha-mangsho',
-  'Chicken Rezala': 'chicken-rezala',
-  'Shorshe Ilish / Mustard Fish Curry': 'shorshe-ilish',
-  'Bhetki Paturi (Banana Leaf Steamed Fish)': 'bhetki-paturi',
-  'Doi Katla / Rui Kalia': 'doi-maach',
-  'Cholar Dal & Aloor Dom': 'luchi-alur-dom',
-  'Chanar Dalna (Bengali Cottage Cheese Curry)': 'chanar-dalna',
-  'Luchi Basket (4 pcs per person)': 'luchi',
-  'Aamer Chutney & Papad': 'mango-chutney',
-  'Rosogolla (2 pcs)': 'rasgulla',
-  'Kacha Golla / Makha Sandesh': 'sandesh',
-  'Baked Mishti Doi': 'mishti-doi',
+export const FALLBACK_DISH_IMAGE = '/images/fallback-dish.jpg';
+
+// Optional search query hints for Bengali dish names so Wikimedia returns the best photo
+const SEARCH_HINTS: Record<string, string> = {
+  'Kolkata Vegetable Chop & Beguni Platter': 'Beguni Kolkata',
+  'Kolkata Bhetki Fish Fry': 'Kolkata fish fry',
+  'Kolkata Dum Biryani (Chicken or Mutton)': 'Kolkata biryani',
+  'Basanti Polao': 'Basanti pulao',
+  'Chicken Chaanp': 'Chicken chaap',
+  'Kosha Mangsho (Slow-Cooked Mutton)': 'Kosha mangsho',
+  'Shorshe Ilish / Mustard Fish Curry': 'Shorshe ilish',
+  'Doi Katla / Rui Kalia': 'Doi maach',
+  'Cholar Dal & Aloor Dom': 'Alur dom',
+  'Luchi Basket (4 pcs per person)': 'Luchi food',
+  'Aamer Chutney & Papad': 'Mango chutney',
+  'Rosogolla (2 pcs)': 'Rasgulla',
+  'Kacha Golla / Makha Sandesh': 'Sandesh sweet',
+  'Baked Mishti Doi': 'Mishti doi',
 };
 
-const CATEGORY_SLUGS: Record<string, string> = {
-  Starters: 'beguni',
-  'Biryani & Polao': 'kolkata-biryani',
-  'Chicken & Mutton': 'kosha-mangsho',
-  'Bengali Fish': 'shorshe-ilish',
-  'Vegetarian Mains': 'luchi-alur-dom',
-  'Sides & Breads': 'luchi',
-  'Bengali Desserts': 'rasgulla',
-};
-
-export const FALLBACK_DISH_IMAGE = '/images/wikimedia-cache/bengali-thali.jpg';
-
-export function getDishImage(dish: { name: string; category: string; photo?: string }): string {
+export function getDishInitialImage(dish: { photo?: string }): string {
   if (dish.photo && dish.photo.trim() !== '') {
     return dish.photo;
   }
-  const slug = DISH_SLUGS[dish.name] || CATEGORY_SLUGS[dish.category] || 'bengali-thali';
-  return `/images/wikimedia-cache/${slug}.jpg`;
+  return FALLBACK_DISH_IMAGE;
 }
 
-export function getFallbackDishImage(dish: { category: string }): string {
-  const slug = CATEGORY_SLUGS[dish.category] || 'bengali-thali';
-  return `/images/wikimedia-cache/${slug}.jpg`;
+export function getWikimediaQuery(dish: { name: string }): string {
+  return SEARCH_HINTS[dish.name] || dish.name.replace(/\(.*?\)/g, '').trim();
 }

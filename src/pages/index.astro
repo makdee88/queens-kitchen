@@ -2,7 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import settings from '../data/settings.json';
 import menuData from '../data/menu.json';
-import { getDishImage, DEFAULT_BENGALI_PLATE } from '../utils/dishImages';
+import DishImage from '../components/DishImage.astro';
 
 const eventImports = import.meta.glob('../content/events/*.md', { eager: true });
 const upcomingEvents = Object.values(eventImports)
@@ -219,14 +219,10 @@ const featuredDishes = menuData.dishes.filter((d) => d.available !== false).slic
     <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-10">
       {featuredDishes.map((dish) => (
         <div class="p-4 rounded-2xl border border-gray-200 bg-white flex items-start gap-4 shadow-sm hover:border-amber-300 transition">
-          <img
-            src={getDishImage(dish)}
-            alt={dish.name}
-            loading="lazy"
-            referrerpolicy="no-referrer"
-			onerror="this.onerror=null; this.src='/images/wikimedia-cache/Bengali_thali_-_Kolkata.jpg';"
-            class="w-20 h-20 rounded-xl object-cover shrink-0 border border-amber-100 bg-amber-50"
-          />
+			<DishImage
+			dish={dish}
+			class="w-20 h-20 rounded-xl object-cover shrink-0 border border-amber-100 bg-amber-50"
+			/>
           <div class="flex-1 min-w-0">
             <div class="flex items-center justify-between gap-2 mb-1">
               <span class="text-[11px] font-bold uppercase tracking-wider text-amber-700">{dish.category}</span>

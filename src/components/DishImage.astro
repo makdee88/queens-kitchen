@@ -1,0 +1,69 @@
+---
+import { getDishInitialImage, getWikimediaQuery, FALLBACK_DISH_IMAGE } from '../utils/dishImages';
+
+interface Props {
+  dish: {
+    name: string;
+    category: string;
+    photo?: string;
+  };
+  class?: string;
+}
+
+const { dish, class: className = 'w-full h-full object-cover' } = Astro.props;
+const hasCustomPhoto = Boolean(dish.photo && dish.photo.trim() !== '');
+const initialSrc = getDishInitialImage(dish);
+const wikiQuery = hasCustomPhoto ? '' : getWikimediaQuery(dish);
+---
+
+<img
+  src={initialSrc}
+  alt={dish.name}
+  loading="lazy"
+  referrerpolicy="no-referrer"
+  data-wiki-query={wikiQuery}
+  onerror={`this.onerror=null; this.src='${FALLBACK_DISH_IMAGE}';`}
+  class={className}
+/>
+
+<script>
+  // Runs once per page load to resolve Wikimedia Commons URLs for dishes without a custom CMS photo
+  const wikiImages = document.querySelectorAll<HTMLImageElement>('img[data-wiki-query]:not([data-wiki-query=""])');
+
+  wikiImages.forEach(async (img) => {
+    const query = img.dataset.wikiQuery;
+    if (!query) return;
+
+    const cacheKey = `qk_wiki_${query.toLowerCase()}`;
+    const cachedUrl = sessionStorage.getItem(cacheKey);
+    if (cachedUrl) {
+      img.src = cachedUrl;
+      return;
+    }
+
+    try {
+      const apiUrl =
+        `https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*` +
+        `&generator=search&gsrnamespace=6&gsrlimit=5&gsrsearch=${encodeURIComponent(query)}` +
+        `&prop=imageinfo&iiprop=url|mime&iiurlwidth=640`;
+
+      const res = await fetch(apiUrl);
+      if (!res.ok) return;
+
+      const data = await res.json();
+      const pages = Object.values(data?.query?.pages || {}) as any[];
+      const match = pages.find((p) => {
+        const mime = p?.imageinfo?.[0]?.mime || '';
+        return mime === 'image/jpeg' || mime === 'image/png' || mime === 'image/webp';
+      });
+
+      const resolvedUrl = match?.imageinfo?.[0]?.thumburl || match?.imageinfo?.[0]?.url;
+      if (resolvedUrl) {
+        sessionStorage.setItem(cacheKey, resolvedUrl);
+        img.src = resolvedUrl;
+      }
+    } catch {
+      // Silently keep /images/fallback-dish.jpg on network error
+    }
+  });
+</script>
