@@ -1,1 +1,7 @@
-{ "business_name": "Queen's Kitchen", "phone": "", "email": "" }
+{
+  "business_name": "Queen's Kitchen",
+  "phone": "+46 073-497 66 11",
+  "email": "m4mainak@gmail.com",
+  "address": "Hanstavägen 92164 55 Kista, Stockholm",
+  "banner_notice": "Under Development"
+}
