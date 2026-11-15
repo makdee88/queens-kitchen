@@ -97,10 +97,12 @@ content:
             options:
               values:
                 - Starters
-                - Mains
-                - Sides
-                - Desserts
-                - Drinks
+                - Biryani & Polao
+                - Chicken & Mutton
+                - Bengali Fish
+                - Vegetarian Mains
+                - Sides & Breads
+                - Bengali Desserts
             required: true
           - name: description
             label: Ingredients / Allergens
@@ -130,7 +132,6 @@ content:
             label: Available
             type: boolean
             default: true
-
 # About Us Page Content
   - name: about
     label: About Us Page

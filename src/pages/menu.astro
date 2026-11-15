@@ -4,12 +4,19 @@ import menuData from '../data/menu.json';
 import settings from '../data/settings.json';
 
 const availableDishes = menuData.dishes.filter((d) => d.available !== false);
-const categories = ['Starters', 'Mains', 'Sides', 'Desserts', 'Drinks'].filter((cat) =>
-  availableDishes.some((d) => d.category === cat)
-);
+const categories = [
+  'All',
+  'Starters',
+  'Biryani & Polao',
+  'Chicken & Mutton',
+  'Bengali Fish',
+  'Vegetarian Mains',
+  'Sides & Breads',
+  'Bengali Desserts',
+].filter((cat) => cat === 'All' || availableDishes.some((d) => d.category === cat));
 ---
 
-<Layout title={`Build Your Menu Combo | ${settings.business_name}`}>
+<Layout title={`Build Your Bengali Menu Combo | ${settings.business_name}`}>
   <section
     class="max-w-7xl mx-auto px-4 py-12"
     x-data={`{
@@ -18,7 +25,7 @@ const categories = ['Starters', 'Mains', 'Sides', 'Desserts', 'Drinks'].filter((
       guests: ${menuData.min_guests},
       packages: ${JSON.stringify(menuData.packages)},
       selectedPackageId: ${JSON.stringify(menuData.packages[0]?.id || '')},
-      activeCategory: ${JSON.stringify(categories[0] || 'Starters')},
+      activeCategory: 'All',
       selectedDishes: [],
       customer: { name: '', email: '', phone: '', event_date: '', notes: '' },
       submitting: false,
@@ -33,7 +40,11 @@ const categories = ['Starters', 'Mains', 'Sides', 'Desserts', 'Drinks'].filter((
         if (idx > -1) {
           this.selectedDishes.splice(idx, 1);
         } else {
-          this.selectedDishes.push({ name: dish.name, category: dish.category, extra_price: Number(dish.extra_price || 0) });
+          this.selectedDishes.push({
+            name: dish.name,
+            category: dish.category,
+            extra_price: Number(dish.extra_price || 0)
+          });
         }
       },
       isSelected(dishName) {
@@ -77,7 +88,7 @@ const categories = ['Starters', 'Mains', 'Sides', 'Desserts', 'Drinks'].filter((
           if (!res.ok) throw new Error('Submission failed');
           this.submitted = true;
         } catch (err) {
-          this.errorMsg = 'Could not send request right now. Please try again or call us directly.';
+          this.errorMsg = 'Could not send request right now. Please try again or contact us on Facebook/Phone.';
         } finally {
           this.submitting = false;
         }
@@ -85,26 +96,27 @@ const categories = ['Starters', 'Mains', 'Sides', 'Desserts', 'Drinks'].filter((
     }`}
   >
     <div class="text-center max-w-2xl mx-auto mb-10">
-      <h1 class="text-4xl font-bold tracking-tight mb-3">Build Your Menu Combo</h1>
-      <p class="text-gray-600">
-        Select a base package, pick your favorite dishes, and see your instant price estimate.
+      <span class="text-xs font-bold uppercase tracking-widest text-amber-700">100% Beef-Free & Pork-Free Kitchen</span>
+      <h1 class="text-4xl font-bold tracking-tight mt-1 mb-3">Build Your Bengali Menu Combo</h1>
+      <p class="text-gray-600 text-sm sm:text-base">
+        Start with a base package or our signature <strong>Maharaja Thali</strong>, then customize with Kolkata Biryani, Chaanp, Kosha Mangsho, Bengali Fish & Mishti.
       </p>
     </div>
 
     <div class="grid lg:grid-cols-3 gap-8 items-start">
-      <!-- Left 2 Columns: Package & Dish Selection -->
+      <!-- Left 2 Columns -->
       <div class="lg:col-span-2 space-y-8">
         <!-- Step 1: Base Package & Guests -->
         <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
           <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
-            <h2 class="text-xl font-bold">1. Choose Combo Package</h2>
-            <div class="flex items-center gap-2">
-              <label class="text-sm font-medium text-gray-700">Guests (Min {menuData.min_guests}):</label>
+            <h2 class="text-xl font-bold">1. Choose Base Package & Guests</h2>
+            <div class="flex items-center gap-2 bg-amber-50 px-3 py-1.5 rounded-xl border border-amber-200">
+              <label class="text-sm font-semibold text-amber-950">Guests (Min {menuData.min_guests}):</label>
               <input
                 type="number"
                 min={menuData.min_guests}
                 x-model.number="guests"
-                class="w-24 rounded-lg border-gray-300 border px-3 py-1.5 text-center font-semibold"
+                class="w-20 rounded-lg border-amber-300 border bg-white px-2 py-1 text-center font-bold text-gray-900"
               />
             </div>
           </div>
@@ -114,121 +126,162 @@ const categories = ['Starters', 'Mains', 'Sides', 'Desserts', 'Drinks'].filter((
               <button
                 type="button"
                 @click={`selectedPackageId = '${pkg.id}'`}
-                :class={`selectedPackageId === '${pkg.id}' ? 'border-amber-600 bg-amber-50/70 ring-2 ring-amber-600/20' : 'border-gray-200 hover:border-amber-300'`}
+                :class={`selectedPackageId === '${pkg.id}' ? 'border-amber-600 bg-amber-50/80 ring-2 ring-amber-600/20' : 'border-gray-200 hover:border-amber-300'`}
                 class="text-left p-4 rounded-xl border transition flex flex-col justify-between"
               >
                 <div>
                   <div class="font-bold text-gray-900">{pkg.name}</div>
-                  <p class="text-xs text-gray-600 mt-1">{pkg.description}</p>
+                  <p class="text-xs text-gray-600 mt-1 leading-relaxed">{pkg.description}</p>
                 </div>
-                <div class="mt-4 text-sm font-bold text-amber-800">
-                  {pkg.price_per_person} {menuData.currency} / person
+                <div class="mt-4 pt-2 border-t border-gray-100 text-sm font-extrabold text-amber-800">
+                  {pkg.price_per_person} {menuData.currency} <span class="font-normal text-xs text-gray-500">/ person</span>
                 </div>
               </button>
             ))}
           </div>
         </div>
 
-        <!-- Step 2: Dish Selection by Category -->
+        <!-- Step 2: Dish Selection -->
         <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-          <h2 class="text-xl font-bold mb-4">2. Pick Your Dishes</h2>
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+            <h2 class="text-xl font-bold">2. Customize Your Dishes</h2>
+            <span class="text-xs text-gray-500">Click any dish to add or remove it</span>
+          </div>
 
-          <!-- Category Tabs -->
-          <div class="flex flex-wrap gap-2 mb-6 border-b border-gray-100 pb-3">
+          <!-- Category Filter Pills -->
+          <div class="flex flex-wrap gap-2 mb-6 border-b border-gray-100 pb-4">
             {categories.map((cat) => (
               <button
                 type="button"
                 @click={`activeCategory = '${cat}'`}
                 :class={`activeCategory === '${cat}' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'`}
-                class="px-4 py-2 rounded-full text-sm font-medium transition"
+                class="px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium transition"
               >
                 {cat}
               </button>
             ))}
           </div>
 
-          <!-- Dish Cards -->
+          <!-- Dish Grid with Thumbnail Photos -->
           <div class="grid sm:grid-cols-2 gap-4">
             {availableDishes.map((dish) => (
               <div
-                x-show={`activeCategory === '${dish.category}'`}
+                x-show={`activeCategory === 'All' || activeCategory === '${dish.category}'`}
                 @click={`toggleDish(${JSON.stringify(dish)})`}
-                :class={`isSelected(${JSON.stringify(dish.name)}) ? 'border-amber-600 bg-amber-50/50' : 'border-gray-200 hover:border-gray-300'`}
-                class="cursor-pointer p-4 rounded-xl border transition flex justify-between items-start gap-3"
+                :class={`isSelected(${JSON.stringify(dish.name)}) ? 'border-amber-600 bg-amber-50/50 ring-1 ring-amber-600/30' : 'border-gray-200 hover:border-gray-300'`}
+                class="cursor-pointer p-3.5 rounded-xl border transition flex items-start gap-3.5"
               >
-                <div>
-                  <div class="flex items-center gap-2">
-                    <span class="font-semibold text-gray-900">{dish.name}</span>
+                <!-- Small Dish Thumbnail -->
+                <div class="w-16 h-16 rounded-lg overflow-hidden bg-amber-100/70 border border-amber-200/50 shrink-0 flex items-center justify-center">
+                  {dish.photo ? (
+                    <img
+                      src={dish.photo}
+                      alt={dish.name}
+                      loading="lazy"
+                      class="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span class="text-xs font-bold text-amber-800/70 text-center px-1 leading-tight">
+                      {dish.category.split(' ')[0]}
+                    </span>
+                  )}
+                </div>
+
+                <!-- Dish Details -->
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-start justify-between gap-2">
+                    <span class="font-semibold text-sm text-gray-900 leading-snug">{dish.name}</span>
+                    <input
+                      type="checkbox"
+                      :checked={`isSelected(${JSON.stringify(dish.name)})`}
+                      class="mt-0.5 h-4 w-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500 pointer-events-none shrink-0"
+                    />
+                  </div>
+
+                  <div class="mt-1">
                     {dish.extra_price > 0 ? (
-                      <span class="text-xs font-semibold bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full">
+                      <span class="inline-block text-[11px] font-semibold bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full">
                         +{dish.extra_price} {menuData.currency}/pp
                       </span>
                     ) : (
-                      <span class="text-xs text-emerald-700 font-medium">Included</span>
+                      <span class="inline-block text-[11px] text-emerald-700 font-semibold">
+                        Included in base
+                      </span>
                     )}
                   </div>
+
                   {dish.description && (
-                    <p class="text-xs text-gray-600 mt-1">{dish.description}</p>
+                    <p class="text-xs text-gray-600 mt-1 line-clamp-2">{dish.description}</p>
                   )}
+
                   {dish.dietary && dish.dietary.length > 0 && (
                     <div class="flex flex-wrap gap-1 mt-2">
                       {dish.dietary.map((tag: string) => (
-                        <span class="text-[11px] px-2 py-0.5 bg-gray-100 text-gray-600 rounded">
+                        <span class="text-[10px] px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded">
                           {tag}
                         </span>
                       ))}
                     </div>
                   )}
                 </div>
-
-                <input
-                  type="checkbox"
-                  :checked={`isSelected(${JSON.stringify(dish.name)})`}
-                  class="mt-1 h-5 w-5 rounded border-gray-300 text-amber-600 focus:ring-amber-500 pointer-events-none"
-                />
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      <!-- Right Column: Sticky Summary & Contact Lead Form -->
+      <!-- Right Column: Sticky Live Price Breakdown & Lead Form -->
       <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-md lg:sticky lg:top-6">
-        <h2 class="text-xl font-bold mb-4">Your Custom Menu Summary</h2>
+        <h2 class="text-xl font-bold mb-4">Your Custom Feast Summary</h2>
 
         <div class="space-y-2 text-sm border-b border-gray-100 pb-4 mb-4">
           <div class="flex justify-between">
-            <span class="text-gray-600">Package:</span>
-            <span class="font-semibold" x-text="currentPackage.name"></span>
+            <span class="text-gray-600">Base Package:</span>
+            <span class="font-semibold text-right" x-text="currentPackage.name"></span>
           </div>
           <div class="flex justify-between">
-            <span class="text-gray-600">Guests:</span>
+            <span class="text-gray-600">Base Rate:</span>
+            <span class="font-medium" x-text="`${currentPackage.price_per_person} ${currency}/pp`"></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600">Selected Upgrades/Add-ons:</span>
+            <span class="font-medium text-amber-800" x-text="`+${extraPerPerson} ${currency}/pp`"></span>
+          </div>
+          <div class="flex justify-between pt-1 border-t border-dashed border-gray-200">
+            <span class="text-gray-800 font-medium">Total Rate per Person:</span>
+            <span class="font-bold text-gray-900" x-text="`${pricePerPerson} ${currency}`"></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600">Guest Count:</span>
             <span class="font-semibold" x-text="Math.max(minGuests, guests)"></span>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-gray-600">Rate per person:</span>
-            <span class="font-semibold" x-text="`${pricePerPerson} ${currency}`"></span>
           </div>
         </div>
 
         <!-- Selected Dishes List -->
         <div class="mb-4">
           <div class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
-            Selected Dishes (<span x-text="selectedDishes.length"></span>)
+            Selected Items (<span x-text="selectedDishes.length"></span>)
           </div>
           <template x-if="selectedDishes.length === 0">
-            <p class="text-xs text-gray-400 italic">Click dishes on the left to add them to your combo.</p>
+            <p class="text-xs text-gray-400 italic">Click dishes on the left to build your platter.</p>
           </template>
-          <ul class="space-y-1.5 max-h-40 overflow-y-auto text-sm">
+          <ul class="space-y-1.5 max-h-48 overflow-y-auto text-xs">
             <template x-for="item in selectedDishes" :key="item.name">
-              <li class="flex justify-between items-center bg-gray-50 px-2.5 py-1.5 rounded-lg">
-                <span x-text="item.name" class="truncate pr-2"></span>
+              <li class="flex justify-between items-center bg-gray-50 px-2.5 py-1.5 rounded-lg gap-2">
+                <div class="truncate">
+                  <span x-text="item.name" class="font-medium text-gray-800"></span>
+                  <span
+                    x-show="item.extra_price > 0"
+                    x-text="` (+${item.extra_price} ${currency})`"
+                    class="text-amber-800 font-semibold"
+                  ></span>
+                </div>
                 <button
                   type="button"
                   @click="toggleDish(item)"
-                  class="text-xs text-red-600 hover:underline shrink-0"
+                  class="text-red-600 hover:underline shrink-0 font-medium"
                 >
-                  Remove
+                  ✕
                 </button>
               </li>
             </template>
@@ -237,15 +290,18 @@ const categories = ['Starters', 'Mains', 'Sides', 'Desserts', 'Drinks'].filter((
 
         <!-- Total Price Box -->
         <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 flex justify-between items-center">
-          <span class="font-semibold text-amber-950">Estimated Total</span>
+          <div>
+            <span class="block font-bold text-amber-950 text-sm">Estimated Total</span>
+            <span class="text-[11px] text-amber-800" x-text="`For ${Math.max(minGuests, guests)} guests`"></span>
+          </div>
           <span class="text-2xl font-extrabold text-amber-900" x-text="`${totalPrice} ${currency}`"></span>
         </div>
 
         <!-- Lead Form -->
         <template x-if="submitted">
           <div class="bg-emerald-50 border border-emerald-200 text-emerald-900 p-4 rounded-xl text-sm">
-            <p class="font-bold mb-1">Thank you! Your menu request is saved.</p>
-            <p>We will contact you shortly via phone or email to confirm your booking.</p>
+            <p class="font-bold mb-1">Thank you! Your custom menu is saved.</p>
+            <p>We will reach out shortly via phone/WhatsApp or email to finalize your event details.</p>
           </div>
         </template>
 
@@ -278,7 +334,7 @@ const categories = ['Starters', 'Mains', 'Sides', 'Desserts', 'Drinks'].filter((
           />
           <textarea
             rows="2"
-            placeholder="Allergies or special requests (optional)"
+            placeholder="Spice level, allergies, or special requests (optional)"
             x-model="customer.notes"
             class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
           ></textarea>

@@ -210,20 +210,28 @@ const featuredDishes = menuData.dishes.filter((d) => d.available !== false).slic
       </p>
     </div>
 
-    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
+	<div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-10">
       {featuredDishes.map((dish) => (
-        <div class="p-5 rounded-xl border border-gray-200 bg-white flex flex-col justify-between">
-          <div>
+        <div class="p-4 rounded-2xl border border-gray-200 bg-white flex items-start gap-4 shadow-sm hover:border-amber-300 transition">
+          {dish.photo && (
+            <img
+              src={dish.photo}
+              alt={dish.name}
+              loading="lazy"
+              class="w-20 h-20 rounded-xl object-cover shrink-0 border border-amber-100"
+            />
+          )}
+          <div class="flex-1 min-w-0">
             <div class="flex items-center justify-between gap-2 mb-1">
-              <span class="text-xs font-semibold uppercase text-amber-700">{dish.category}</span>
+              <span class="text-[11px] font-bold uppercase tracking-wider text-amber-700">{dish.category}</span>
               {dish.extra_price > 0 && (
-                <span class="text-xs bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full font-medium">
+                <span class="text-[11px] bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full font-semibold shrink-0">
                   +{dish.extra_price} {menuData.currency}
                 </span>
               )}
             </div>
-            <h3 class="font-bold text-gray-900">{dish.name}</h3>
-            {dish.description && <p class="text-xs text-gray-600 mt-1">{dish.description}</p>}
+            <h3 class="font-bold text-gray-900 text-base leading-snug">{dish.name}</h3>
+            {dish.description && <p class="text-xs text-gray-600 mt-1 line-clamp-2">{dish.description}</p>}
           </div>
         </div>
       ))}
