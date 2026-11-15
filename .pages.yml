@@ -43,7 +43,6 @@ content:
       - name: body
         label: Event Details
         type: rich-text
-
   - name: menu
     label: Menu & Combo Builder
     type: file
@@ -131,22 +130,21 @@ content:
             label: Available
             type: boolean
             default: true
-      # 4. Manual Website Publish Trigger (Updates trigger-build to start Cloudflare build)
-      - name: publish
-        label: Publish Website Updates
-        type: file
-        path: trigger-build.json
-        fields:
-          - name: last_published
-            label: Last Published Date & Time
-            type: date
-            options:
-              time: true
-            required: true
-          - name: release_note
-            label: Update Note (e.g., Added new weekend menu)
-            type: string
-            default: Menu and event updates
+  - name: publish
+    label: Publish Website Updates
+    type: file
+    path: trigger-build.json
+    fields:
+      - name: last_published
+        label: Last Published Date & Time
+        type: date
+        options:
+          time: true
+        required: true
+      - name: release_note
+        label: Update Note (e.g., Added new weekend menu)
+        type: string
+        default: Menu and event updates
   - name: settings
     label: Kitchen Contact & Hours
     type: file
