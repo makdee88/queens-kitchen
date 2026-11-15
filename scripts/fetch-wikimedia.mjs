@@ -1,51 +1,76 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-const FILES = [
-  'Beguni_-_Kolkata_2011-08-18_4826.JPG',
-  'Fish_fry_-_Kolkata_2011-08-18_4823.JPG',
-  'Kolkata_Mutton_Biryani.jpg',
-  'Basanti_Pulao.jpg',
-  'Chicken_Chaap.JPG',
-  'Kosha_Mangsho_-_Kolkata_2011-08-18_4829.JPG',
-  'Chicken_Rezala_-_Kolkata.jpg',
-  'Shorshe_ilish_or_Hilsa_in_mustard_gravy.jpg',
-  'Bhetki_fish_paturi.jpg',
-  'Rui_posto.jpg',
-  'Luchi_and_Alur_Dom.jpg',
-  'Chhanar_Dalna.jpg',
-  'Luchi_-_Kolkata_2011-08-18_4827.JPG',
-  'Mango_chutney.jpg',
-  'Rasgulla_-_Howrah_2015-05-17_0549.JPG',
-  'Sandesh_-_Kolkata_2011-08-18_4818.JPG',
-  'Mishti_Doi_-_Howrah_2015-05-17_0553.JPG',
-  'Bengali_thali_-_Kolkata.jpg',
+// Maps each dish name to a clean local cache filename + Wikimedia Commons search query
+const DISH_QUERIES = [
+  { slug: 'beguni', query: 'Beguni Kolkata' },
+  { slug: 'fish-fry', query: 'Fish fry Kolkata' },
+  { slug: 'kolkata-biryani', query: 'Kolkata Biryani' },
+  { slug: 'basanti-polao', query: 'Basanti Pulao' },
+  { slug: 'chicken-chaap', query: 'Chicken Chaap' },
+  { slug: 'kosha-mangsho', query: 'Kosha Mangsho' },
+  { slug: 'chicken-rezala', query: 'Chicken Rezala' },
+  { slug: 'shorshe-ilish', query: 'Shorshe Ilish' },
+  { slug: 'bhetki-paturi', query: 'Bhetki Paturi' },
+  { slug: 'doi-maach', query: 'Doi Maach' },
+  { slug: 'luchi-alur-dom', query: 'Luchi Alur Dom' },
+  { slug: 'chanar-dalna', query: 'Chanar Dalna' },
+  { slug: 'luchi', query: 'Luchi Bengali' },
+  { slug: 'mango-chutney', query: 'Mango chutney' },
+  { slug: 'rasgulla', query: 'Rasgulla Kolkata' },
+  { slug: 'sandesh', query: 'Sandesh Kolkata' },
+  { slug: 'mishti-doi', query: 'Mishti Doi' },
+  { slug: 'bengali-thali', query: 'Bengali thali' },
 ];
 
 const OUT_DIR = path.resolve('public/images/wikimedia-cache');
 fs.mkdirSync(OUT_DIR, { recursive: true });
 
-for (const file of FILES) {
-  const dest = path.join(OUT_DIR, file);
+const HEADERS = {
+  'User-Agent': 'QueensKitchenStockholm/1.0 (https://queenskitchen.pages.dev)',
+};
+
+async function searchAndDownload(slug, query) {
+  const dest = path.join(OUT_DIR, `${slug}.jpg`);
   if (fs.existsSync(dest) && fs.statSync(dest).size > 2000) {
-    continue;
+    return;
   }
-  const url = `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(file)}?width=640`;
+
+  // Query Wikimedia Commons API for real existing files matching the dish
+  const apiUrl =
+    `https://commons.wikimedia.org/w/api.php?action=query&format=json` +
+    `&generator=search&gsrnamespace=6&gsrlimit=3&gsrsearch=${encodeURIComponent(query)}` +
+    `&prop=imageinfo&iiprop=url&iiurlwidth=640`;
+
   try {
-    const res = await fetch(url, {
-      headers: {
-        'User-Agent': 'QueensKitchenStockholmBot/1.0 (https://queenskitchen.pages.dev)',
-      },
-      redirect: 'follow',
+    const res = await fetch(apiUrl, { headers: HEADERS });
+    const data = await res.json();
+    const pages = Object.values(data?.query?.pages || {});
+    const validPage = pages.find((p) => {
+      const thumb = p?.imageinfo?.[0]?.thumburl || '';
+      return /\.(jpe?g|png|webp)$/i.test(thumb);
     });
-    if (!res.ok) {
-      console.warn(`Skipping ${file}: HTTP ${res.status}`);
-      continue;
+
+    const imageUrl = validPage?.imageinfo?.[0]?.thumburl;
+    if (!imageUrl) {
+      console.warn(`No Wikimedia match for "${query}"`);
+      return;
     }
-    const buf = Buffer.from(await res.arrayBuffer());
+
+    const imgRes = await fetch(imageUrl, { headers: HEADERS });
+    if (!imgRes.ok) {
+      console.warn(`Download failed for ${slug}: HTTP ${imgRes.status}`);
+      return;
+    }
+
+    const buf = Buffer.from(await imgRes.arrayBuffer());
     fs.writeFileSync(dest, buf);
-    console.log(`Downloaded ${file} (${Math.round(buf.length / 1024)} KB)`);
+    console.log(`Saved ${slug}.jpg (${Math.round(buf.length / 1024)} KB)`);
   } catch (err) {
-    console.warn(`Error downloading ${file}:`, err.message);
+    console.warn(`Error fetching ${slug}:`, err.message);
   }
+}
+
+for (const item of DISH_QUERIES) {
+  await searchAndDownload(item.slug, item.query);
 }
