@@ -1,0 +1,161 @@
+media:
+  input: public/images/uploads
+  output: /images/uploads
+
+content:
+  # 1. Upcoming Events (Each event is saved as its own Markdown file)
+  - name: events
+    label: Upcoming Events
+    type: collection
+    path: src/content/events
+    filename: "{year}-{month}-{day}-{primary}.md"
+    view:
+      fields: [title, event_date, active]
+      primary: title
+      sort: [event_date]
+      default:
+        sort: event_date
+        order: desc
+    fields:
+      - name: title
+        label: Event Title
+        type: string
+        required: true
+      - name: event_date
+        label: Event Date & Time
+        type: date
+        options:
+          time: true
+        required: true
+      - name: location
+        label: Location / Venue
+        type: string
+        default: Queen's Kitchen
+      - name: banner
+        label: Event Poster / Photo
+        type: image
+      - name: active
+        label: Show on Website
+        type: boolean
+        default: true
+      - name: price_note
+        label: Ticket or Entry Note (Optional)
+        type: string
+      - name: body
+        label: Event Details
+        type: rich-text
+
+  # 2. Interactive Menu & Combo Builder Data (Saved as a single JSON file)
+  - name: menu
+    label: Menu & Combo Builder
+    type: file
+    path: src/data/menu.json
+    fields:
+      - name: currency
+        label: Currency Symbol
+        type: string
+        default: SEK
+        required: true
+      - name: min_guests
+        label: Minimum Guests for Combo Orders
+        type: number
+        options:
+          min: 1
+        default: 10
+        required: true
+      - name: packages
+        label: Base Combo Packages
+        type: object
+        list: true
+        fields:
+          - name: id
+            label: Package ID (e.g. 2-course, 3-course, buffet)
+            type: string
+            required: true
+          - name: name
+            label: Package Name
+            type: string
+            required: true
+          - name: description
+            label: Short Description (e.g. Pick 1 Starter, 2 Mains, 1 Dessert)
+            type: string
+          - name: price_per_person
+            label: Base Price per Person
+            type: number
+            options:
+              min: 0
+            required: true
+      - name: dishes
+        label: Menu Dishes
+        type: object
+        list: true
+        fields:
+          - name: name
+            label: Dish Name
+            type: string
+            required: true
+          - name: category
+            label: Category
+            type: select
+            options:
+              values:
+                - Starters
+                - Mains
+                - Sides
+                - Desserts
+                - Drinks
+            required: true
+          - name: description
+            label: Ingredients / Allergens
+            type: string
+          - name: extra_price
+            label: Extra Cost per Person (+0 for standard included dish)
+            type: number
+            options:
+              min: 0
+            default: 0
+            required: true
+          - name: dietary
+            label: Dietary Tags
+            type: select
+            options:
+              multiple: true
+              values:
+                - Vegetarian
+                - Vegan
+                - Gluten-Free
+                - Halal
+                - Spicy
+          - name: photo
+            label: Dish Photo (Optional)
+            type: image
+          - name: available
+            label: Available
+            type: boolean
+            default: true
+
+  # 3. General Kitchen Settings (Phone, Email, Opening Hours)
+  - name: settings
+    label: Kitchen Contact & Hours
+    type: file
+    path: src/data/settings.json
+    fields:
+      - name: business_name
+        label: Kitchen Name
+        type: string
+        default: Queen's Kitchen
+        required: true
+      - name: phone
+        label: Contact Phone / WhatsApp
+        type: string
+        required: true
+      - name: email
+        label: Order Notification Email
+        type: string
+        required: true
+      - name: address
+        label: Kitchen Address / Pickup Point
+        type: string
+      - name: banner_notice
+        label: Top Announcement Bar (Leave empty to hide)
+        type: string
