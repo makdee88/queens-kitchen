@@ -9,13 +9,24 @@ const navLinks = [
   { label: 'Events', href: '/events' },
   { label: 'Gallery', href: '/gallery' },
 ];
+
+const logoSrc = settings.logo || '/images/qk_logo.jpg';
 ---
 
 <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-amber-200/70" x-data="{ mobileOpen: false }">
   <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
-    <!-- Brand -->
-    <a href="/" class="flex items-center gap-2.5 font-extrabold text-lg sm:text-xl text-gray-900 tracking-tight">
-      <span class="w-8 h-8 rounded-full bg-amber-900 text-amber-300 flex items-center justify-center text-sm font-black">
+    <!-- Brand Logo & Name -->
+    <a href="/" class="flex items-center gap-2.5 font-extrabold text-lg sm:text-xl text-gray-900 tracking-tight group">
+      <img
+        src={logoSrc}
+        alt={`${settings.business_name} logo`}
+        class="w-9 h-9 rounded-full object-cover border border-amber-300/80 shadow-xs bg-amber-50 group-hover:scale-105 transition shrink-0"
+        onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+      />
+      <span
+        style="display: none;"
+        class="w-9 h-9 rounded-full bg-amber-900 text-amber-300 items-center justify-center text-sm font-black shrink-0"
+      >
         QK
       </span>
       <span>{settings.business_name}</span>
@@ -67,7 +78,7 @@ const navLinks = [
   </div>
 
   <!-- Mobile Dropdown -->
-  <div x-show="mobileOpen" class="md:hidden border-t border-amber-100 bg-white px-4 py-4 space-y-2">
+  <div x-show="mobileOpen" x-cloak class="md:hidden border-t border-amber-100 bg-white px-4 py-4 space-y-2">
     {navLinks.map((link) => (
       <a
         href={link.href}

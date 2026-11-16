@@ -71,7 +71,7 @@ const initialData = JSON.stringify({
                 type="number"
                 x-model.number="guests"
                 @change="normalizeGuests()"
-                :min="selectedPackage ? selectedPackage.min_guests : 1"
+                :min="selectedPackage ? (selectedPackage.min_guests || 1) : 1"
                 max="300"
                 class="w-14 text-center text-sm font-bold text-gray-900 bg-transparent focus:outline-none"
               />
@@ -101,7 +101,7 @@ const initialData = JSON.stringify({
                     <h3 class="font-bold text-base text-gray-900" x-text="pkg.name"></h3>
                     <span
                       class="text-xs font-extrabold px-2.5 py-1 rounded-full bg-amber-100 text-amber-950 shrink-0"
-                      x-text="`${pkg.base_price} ${currency}/pp`"
+                      x-text="`${pkg.price_per_person} ${currency}/pp`"
                     ></span>
                   </div>
                   <p class="text-xs text-gray-600 mt-1.5 leading-relaxed" x-text="pkg.description"></p>
@@ -443,7 +443,7 @@ const initialData = JSON.stringify({
         },
 
         get pricePerPerson() {
-          const base = this.selectedPackage ? Number(this.selectedPackage.base_price || 0) : 0;
+          const base = this.selectedPackage ? Number(this.selectedPackage.price_per_person || 0) : 0;
           const extras = this.selectedDishes.reduce((sum, d) => sum + Number(d.extra_price || 0), 0);
           return base + extras;
         },
