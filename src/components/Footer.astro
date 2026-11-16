@@ -1,21 +1,110 @@
 ---
-import { menuMain } from "~/data/menus";
+import settings from '../data/settings.json';
+
+const logoSrc = settings.logo || '/images/qk_logo.jpg';
 const currentYear = new Date().getFullYear();
-import { siteName } from "~/data/config";
 ---
 
-<footer class="bg-brand-green text-white">
-	<div class="container pt-16 pb-8">
-		<p class="text-center font-bold text-4xl text-white">Queen's<span class="text-brand-red bg-white px-3 ml-1 rounded-lg">Kitchen</span></p>
-		<nav class="flex flex-col sm:flex-row items-center justify-center gap-x-12 gap-y-3 font-medium mt-6" aria-label="Footer">
-			{
-				menuMain.map((item) => (
-					<a href={item.url} class="hover:underline">
-						{item.name}
-					</a>
-				))
-			}
-		</nav>
-		<p class="mt-10 text-center text-sm">&copy; {currentYear} {siteName}. All rights reserved. <a class="underline" href="/privacy-policy">Privacy policy</a></p>
-	</div>
+<footer class="bg-stone-900 text-stone-200 border-t border-amber-900/40 mt-16">
+  <div class="max-w-7xl mx-auto px-4 py-12 grid gap-8 md:grid-cols-3">
+    <!-- Brand Column -->
+    <div class="space-y-3">
+      <a href="/" class="inline-flex items-center gap-3 group">
+        <img
+          src={logoSrc}
+          alt={`${settings.business_name} logo`}
+          class="w-11 h-11 rounded-full object-cover border border-amber-400/60 bg-amber-50 shrink-0"
+          onerror="this.style.display='none'"
+        />
+        <div>
+          <div class="font-extrabold text-lg text-white tracking-tight">
+            {settings.business_name}
+          </div>
+          <div class="text-xs font-medium text-amber-300">
+            Authentic Bengali Catering • Stockholm
+          </div>
+        </div>
+      </a>
+      <p class="text-xs text-stone-300 leading-relaxed max-w-sm">
+        Traditional West Bengal & Kolkata home-style feasts, festive platters, and bespoke event catering freshly prepared in Stockholm.
+      </p>
+    </div>
+
+    <!-- Quick Links -->
+    <div>
+      <h3 class="text-xs font-bold uppercase tracking-wider text-amber-300 mb-3">
+        Explore
+      </h3>
+      <ul class="space-y-2 text-sm text-stone-300">
+        <li><a href="/" class="hover:text-amber-300 transition">Home</a></li>
+        <li><a href="/menu" class="hover:text-amber-300 transition">Full Menu</a></li>
+        <li><a href="/order" class="hover:text-amber-300 transition">Order & Catering Quote</a></li>
+        <li><a href="/events" class="hover:text-amber-300 transition">Pop-Ups & Events</a></li>
+        <li><a href="/gallery" class="hover:text-amber-300 transition">Gallery</a></li>
+        <li><a href="/about-us" class="hover:text-amber-300 transition">About Us</a></li>
+      </ul>
+    </div>
+
+    <!-- Contact & Hours -->
+    <div>
+      <h3 class="text-xs font-bold uppercase tracking-wider text-amber-300 mb-3">
+        Contact & Orders
+      </h3>
+      <ul class="space-y-2 text-sm text-stone-300">
+        {settings.phone && (
+          <li>
+            <span class="text-stone-400">Phone:</span>{' '}
+            <a href={`tel:${settings.phone}`} class="text-white hover:text-amber-300 font-medium transition">
+              {settings.phone}
+            </a>
+          </li>
+        )}
+        {settings.email && (
+          <li>
+            <span class="text-stone-400">Email:</span>{' '}
+            <a href={`mailto:${settings.email}`} class="text-white hover:text-amber-300 font-medium transition">
+              {settings.email}
+            </a>
+          </li>
+        )}
+        {settings.location && (
+          <li>
+            <span class="text-stone-400">Location:</span>{' '}
+            <span class="text-stone-200">{settings.location}</span>
+          </li>
+        )}
+        {settings.facebook_url && (
+          <li class="pt-1">
+            <a
+              href={settings.facebook_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-300 hover:text-amber-200 underline"
+            >
+              Follow us on Facebook →
+            </a>
+          </li>
+        )}
+      </ul>
+    </div>
+  </div>
+
+  <!-- Bottom Copyright Bar -->
+  <div class="border-t border-stone-800 bg-stone-950/60">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-stone-400">
+      <span>© {currentYear} {settings.business_name}. All rights reserved.</span>
+      <div class="flex items-center gap-2">
+        <span>Made with care in Stockholm, Sweden</span>
+        <span class="text-stone-600">•</span>
+        <a
+          href="https://github.com/makdee88"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-stone-500 hover:text-stone-300 transition-colors"
+        >
+          Built by makdee88
+        </a>
+      </div>
+    </div>
+  </div>
 </footer>
