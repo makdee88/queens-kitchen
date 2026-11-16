@@ -4,8 +4,11 @@ import menuData from '../data/menu.json';
 import settings from '../data/settings.json';
 import DishImage from '../components/DishImage.astro';
 
-const availableDishes = menuData.dishes.filter((d) => d.available !== false);
-const filterCategories = [
+const availableDishes = (menuData.dishes || []).filter((d) => d.available !== false);
+const packages = menuData.packages || [];
+const currency = menuData.currency || 'SEK';
+
+const categories = [
   'All',
   'Starters',
   'Biryani & Polao',
@@ -15,317 +18,524 @@ const filterCategories = [
   'Sides & Breads',
   'Bengali Desserts',
 ].filter((cat) => cat === 'All' || availableDishes.some((d) => d.category === cat));
+
+const initialData = JSON.stringify({
+  packages,
+  dishes: availableDishes,
+  currency,
+});
 ---
 
-<Layout title={`Custom Catering Order & Price Calculator | ${settings.business_name}`}>
+<Layout title={`Order & Catering Quote | ${settings.business_name}`}>
   <section
-    class="max-w-7xl mx-auto px-4 py-12"
-    x-data={`{
-      currency: ${JSON.stringify(menuData.currency)},
-      minGuests: ${menuData.min_guests},
-      guests: ${menuData.min_guests},
-      packages: ${JSON.stringify(menuData.packages)},
-      selectedPackageId: ${JSON.stringify(menuData.packages[0]?.id || '')},
-      activeCategory: 'All',
-      selectedDishes: [],
-      customer: { name: '', email: '', phone: '', event_date: '', notes: '' },
-      submitting: false,
-      submitted: false,
-      errorMsg: '',
-
-      get currentPackage() {
-        return this.packages.find(p => p.id === this.selectedPackageId) || { name: 'Custom', price_per_person: 0 };
-      },
-      toggleDish(dish) {
-        const idx = this.selectedDishes.findIndex(d => d.name === dish.name);
-        if (idx > -1) {
-          this.selectedDishes.splice(idx, 1);
-        } else {
-          this.selectedDishes.push({
-            name: dish.name,
-            category: dish.category,
-            extra_price: Number(dish.extra_price || 0)
-          });
-        }
-      },
-      isSelected(dishName) {
-        return this.selectedDishes.some(d => d.name === dishName);
-      },
-      get extraPerPerson() {
-        return this.selectedDishes.reduce((sum, d) => sum + Number(d.extra_price || 0), 0);
-      },
-      get pricePerPerson() {
-        return Number(this.currentPackage.price_per_person || 0) + this.extraPerPerson;
-      },
-      get totalPrice() {
-        const validGuests = Math.max(this.minGuests, Number(this.guests) || this.minGuests);
-        return validGuests * this.pricePerPerson;
-      },
-      async submitOrder() {
-        this.errorMsg = '';
-        if (!this.customer.name || !this.customer.email || !this.customer.phone) {
-          this.errorMsg = 'Please enter your name, email, and phone number.';
-          return;
-        }
-        if (this.selectedDishes.length === 0) {
-          this.errorMsg = 'Please select at least one dish for your combo.';
-          return;
-        }
-        this.submitting = true;
-        try {
-          const res = await fetch('/api/submit-order', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              ...this.customer,
-              guests: Math.max(this.minGuests, Number(this.guests)),
-              package_name: this.currentPackage.name,
-              selected_dishes: this.selectedDishes,
-              price_per_person: this.pricePerPerson,
-              total_price: this.totalPrice,
-              currency: this.currency
-            })
-          });
-          if (!res.ok) throw new Error('Submission failed');
-          this.submitted = true;
-        } catch (err) {
-          this.errorMsg = 'Could not send request right now. Please try again or contact us on Facebook/Phone.';
-        } finally {
-          this.submitting = false;
-        }
-      }
-    }`}
+    class="max-w-6xl mx-auto px-4 py-10 sm:py-14"
+    x-data={`orderBuilder(${initialData})`}
   >
-    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
-      <div>
-        <span class="text-xs font-bold uppercase tracking-widest text-amber-700">
-          Catering & Party Calculator • 100% Beef-Free & Pork-Free
-        </span>
-        <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mt-1">
-          Build Your Custom Bengali Order
-        </h1>
-        <p class="text-gray-600 text-sm sm:text-base mt-1">
-          Choose a base package or our signature <strong>Maharaja Thali</strong>, tick your dishes, and request a quote.
-        </p>
-      </div>
-      <a href="/menu" class="text-sm font-semibold text-amber-800 hover:underline shrink-0">
-        ← Browse Full Dish Descriptions
-      </a>
+    <!-- Header -->
+    <div class="border-b border-amber-200/80 pb-6 mb-8">
+      <span class="text-xs font-bold uppercase tracking-widest text-amber-700">
+        Custom Platter & Catering Calculator • Stockholm
+      </span>
+      <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-gray-900 mt-1">
+        Build Your Bengali Feast
+      </h1>
+      <p class="text-gray-600 mt-2 text-sm max-w-2xl leading-relaxed">
+        Choose a base package, set your guest count, and pick your favorite dishes. We will review your menu and confirm availability & delivery details shortly.
+      </p>
     </div>
 
     <div class="grid lg:grid-cols-3 gap-8 items-start">
-      <!-- Left 2 Columns -->
+      <!-- Left 2 Columns: Package, Guests & Dish Selection -->
       <div class="lg:col-span-2 space-y-8">
-        <!-- Step 1: Base Package & Guests -->
-        <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-          <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
-            <h2 class="text-xl font-bold">1. Choose Base Package & Guests</h2>
-            <div class="flex items-center gap-2 bg-amber-50 px-3 py-1.5 rounded-xl border border-amber-200">
-              <label class="text-sm font-semibold text-amber-950">Guests (Min {menuData.min_guests}):</label>
+        <!-- Step 1: Package & Guest Count -->
+        <div class="bg-white rounded-2xl border border-gray-200/90 p-5 sm:p-6 shadow-xs">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-amber-700">Step 1</span>
+              <h2 class="text-lg sm:text-xl font-bold text-gray-900">Select Base Package & Guests</h2>
+            </div>
+
+            <!-- Guest Counter -->
+            <div class="flex items-center gap-3 bg-stone-50 border border-gray-200 rounded-xl px-3.5 py-2">
+              <label for="guest-count" class="text-xs font-semibold text-gray-700">Guests:</label>
+              <button
+                type="button"
+                @click="decrementGuests()"
+                class="w-7 h-7 rounded-lg bg-white border border-gray-300 text-gray-800 font-bold hover:bg-amber-50 transition"
+                aria-label="Decrease guests"
+              >
+                −
+              </button>
               <input
+                id="guest-count"
                 type="number"
-                min={menuData.min_guests}
                 x-model.number="guests"
-                class="w-20 rounded-lg border-amber-300 border bg-white px-2 py-1 text-center font-bold text-gray-900"
+                @change="normalizeGuests()"
+                :min="selectedPackage ? selectedPackage.min_guests : 1"
+                max="300"
+                class="w-14 text-center text-sm font-bold text-gray-900 bg-transparent focus:outline-none"
               />
+              <button
+                type="button"
+                @click="guests++"
+                class="w-7 h-7 rounded-lg bg-white border border-gray-300 text-gray-800 font-bold hover:bg-amber-50 transition"
+                aria-label="Increase guests"
+              >
+                +
+              </button>
             </div>
           </div>
 
-          <div class="grid sm:grid-cols-3 gap-4">
-            {menuData.packages.map((pkg) => (
+          <div class="grid sm:grid-cols-2 gap-4">
+            <template x-for="pkg in packages" :key="pkg.name">
               <button
                 type="button"
-                @click={`selectedPackageId = '${pkg.id}'`}
-                :class={`selectedPackageId === '${pkg.id}' ? 'border-amber-600 bg-amber-50/80 ring-2 ring-amber-600/20' : 'border-gray-200 hover:border-amber-300'`}
-                class="text-left p-4 rounded-xl border transition flex flex-col justify-between"
+                @click="selectPackage(pkg)"
+                :class="selectedPackage && selectedPackage.name === pkg.name
+                  ? 'border-amber-600 bg-amber-50/60 ring-2 ring-amber-500/30'
+                  : 'border-gray-200 bg-white hover:border-amber-300'"
+                class="text-left rounded-xl border p-4 transition flex flex-col justify-between"
               >
                 <div>
-                  <div class="font-bold text-gray-900">{pkg.name}</div>
-                  <p class="text-xs text-gray-600 mt-1 leading-relaxed">{pkg.description}</p>
+                  <div class="flex items-start justify-between gap-2">
+                    <h3 class="font-bold text-base text-gray-900" x-text="pkg.name"></h3>
+                    <span
+                      class="text-xs font-extrabold px-2.5 py-1 rounded-full bg-amber-100 text-amber-950 shrink-0"
+                      x-text="`${pkg.base_price} ${currency}/pp`"
+                    ></span>
+                  </div>
+                  <p class="text-xs text-gray-600 mt-1.5 leading-relaxed" x-text="pkg.description"></p>
                 </div>
-                <div class="mt-4 pt-2 border-t border-gray-100 text-sm font-extrabold text-amber-800">
-                  {pkg.price_per_person} {menuData.currency} <span class="font-normal text-xs text-gray-500">/ person</span>
+                <div class="mt-3 pt-2.5 border-t border-gray-100 flex items-center justify-between text-[11px] font-medium text-gray-500">
+                  <span x-text="`Min. ${pkg.min_guests || 1} guests`"></span>
+                  <span
+                    class="font-semibold"
+                    :class="selectedPackage && selectedPackage.name === pkg.name ? 'text-amber-700' : 'text-gray-400'"
+                    x-text="selectedPackage && selectedPackage.name === pkg.name ? '✓ Selected' : 'Select'"
+                  ></span>
                 </div>
               </button>
-            ))}
+            </template>
           </div>
         </div>
 
         <!-- Step 2: Dish Selection -->
-        <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-          <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
-            <h2 class="text-xl font-bold">2. Tick Dishes to Add to Your Order</h2>
-            <span class="text-xs text-gray-500">Tap any card to select or remove</span>
+        <div class="bg-white rounded-2xl border border-gray-200/90 p-5 sm:p-6 shadow-xs">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-amber-700">Step 2</span>
+              <h2 class="text-lg sm:text-xl font-bold text-gray-900">Choose Your Dishes</h2>
+            </div>
+            <span class="text-xs font-semibold text-gray-600 bg-stone-100 px-3 py-1 rounded-full">
+              <span x-text="selectedDishes.length"></span> selected
+            </span>
           </div>
 
-          <div class="flex flex-wrap gap-2 mb-6 border-b border-gray-100 pb-4">
-            {filterCategories.map((cat) => (
+          <!-- Category Filter Tabs -->
+          <div class="flex flex-wrap gap-1.5 mb-5">
+            {categories.map((cat) => (
               <button
                 type="button"
                 @click={`activeCategory = '${cat}'`}
-                :class={`activeCategory === '${cat}' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'`}
-                class="px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium transition"
+                :class={`activeCategory === '${cat}'
+                  ? 'bg-gray-900 text-white'
+                  : 'bg-stone-50 text-gray-700 border border-gray-200 hover:border-amber-300'`}
+                class="px-3 py-1 rounded-full text-xs font-medium transition"
               >
                 {cat}
               </button>
             ))}
           </div>
 
+          <!-- Selectable Dish List -->
           <div class="grid sm:grid-cols-2 gap-3.5">
             {availableDishes.map((dish) => (
               <div
                 x-show={`activeCategory === 'All' || activeCategory === '${dish.category}'`}
                 @click={`toggleDish(${JSON.stringify(dish)})`}
-                :class={`isSelected(${JSON.stringify(dish.name)}) ? 'border-amber-600 bg-amber-50/60 ring-1 ring-amber-600/30' : 'border-gray-200 hover:border-gray-300'`}
-                class="cursor-pointer p-3 rounded-xl border transition flex items-center gap-3"
+                :class={`isDishSelected('${dish.name.replace(/'/g, "\\'")}')
+                  ? 'border-amber-600 bg-amber-50/60 ring-1 ring-amber-500/40'
+                  : 'border-gray-200 bg-white hover:border-amber-300'`}
+                class="cursor-pointer rounded-xl border p-3 transition flex items-center gap-3 select-none"
               >
                 <DishImage
-                dish={dish}
-                class="w-12 h-12 rounded-lg object-cover shrink-0 bg-amber-100"
+                  dish={dish}
+                  class="w-14 h-14 rounded-lg object-cover shrink-0 bg-amber-50 border border-amber-100"
                 />
 
                 <div class="flex-1 min-w-0">
-                  <div class="font-semibold text-sm text-gray-900 truncate">{dish.name}</div>
-                  <div class="text-xs mt-0.5">
+                  <div class="flex items-start justify-between gap-2">
+                    <h3 class="font-semibold text-sm text-gray-900 leading-snug truncate">
+                      {dish.name}
+                    </h3>
+                    <span
+                      :class={`isDishSelected('${dish.name.replace(/'/g, "\\'")}')
+                        ? 'bg-amber-600 text-white border-amber-600'
+                        : 'bg-white text-transparent border-gray-300'`}
+                      class="w-5 h-5 rounded-md border flex items-center justify-center text-xs font-bold shrink-0 transition"
+                    >
+                      ✓
+                    </span>
+                  </div>
+
+                  <div class="flex items-center gap-2 mt-1">
+                    <span class="text-[11px] text-gray-500">{dish.category}</span>
+                    <span class="text-gray-300">•</span>
                     {dish.extra_price > 0 ? (
-                      <span class="font-semibold text-amber-800">
-                        +{dish.extra_price} {menuData.currency}/pp
+                      <span class="text-[11px] font-bold text-amber-800">
+                        +{dish.extra_price} {currency}/pp
                       </span>
                     ) : (
-                      <span class="text-emerald-700 font-medium">Included in base</span>
+                      <span class="text-[11px] font-medium text-emerald-700">Included</span>
                     )}
                   </div>
                 </div>
-
-                <input
-                  type="checkbox"
-                  :checked={`isSelected(${JSON.stringify(dish.name)})`}
-                  class="h-4 w-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500 pointer-events-none shrink-0"
-                />
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      <!-- Right Column: Sticky Live Price Breakdown & Lead Form -->
-      <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-md lg:sticky lg:top-6">
-        <h2 class="text-xl font-bold mb-4">Your Custom Feast Summary</h2>
+      <!-- Right Column: Sticky Summary & Contact Form -->
+      <aside class="lg:sticky lg:top-24 bg-white rounded-2xl border border-gray-200/90 p-5 sm:p-6 shadow-sm">
+        <span class="text-xs font-bold uppercase tracking-wider text-amber-700">Step 3</span>
+        <h2 class="text-lg sm:text-xl font-bold text-gray-900 mb-4">Estimate & Inquiry</h2>
 
-        <div class="space-y-2 text-sm border-b border-gray-100 pb-4 mb-4">
-          <div class="flex justify-between">
-            <span class="text-gray-600">Base Package:</span>
-            <span class="font-semibold text-right" x-text="currentPackage.name"></span>
+        <!-- Live Price Breakdown -->
+        <div class="bg-stone-50 rounded-xl p-4 border border-stone-200/80 space-y-2.5 mb-5 text-sm">
+          <div class="flex justify-between text-gray-700">
+            <span>Package:</span>
+            <span class="font-semibold text-gray-900" x-text="selectedPackage ? selectedPackage.name : '—'"></span>
           </div>
-          <div class="flex justify-between">
-            <span class="text-gray-600">Base Rate:</span>
-            <span class="font-medium" x-text="`${currentPackage.price_per_person} ${currency}/pp`"></span>
+          <div class="flex justify-between text-gray-700">
+            <span>Guests:</span>
+            <span class="font-semibold text-gray-900" x-text="`${guests} people`"></span>
           </div>
-          <div class="flex justify-between">
-            <span class="text-gray-600">Selected Upgrades/Add-ons:</span>
-            <span class="font-medium text-amber-800" x-text="`+${extraPerPerson} ${currency}/pp`"></span>
+          <div class="flex justify-between text-gray-700">
+            <span>Rate per person:</span>
+            <span class="font-semibold text-gray-900" x-text="`${pricePerPerson} ${currency}`"></span>
           </div>
-          <div class="flex justify-between pt-1 border-t border-dashed border-gray-200">
-            <span class="text-gray-800 font-medium">Total Rate per Person:</span>
-            <span class="font-bold text-gray-900" x-text="`${pricePerPerson} ${currency}`"></span>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-gray-600">Guest Count:</span>
-            <span class="font-semibold" x-text="Math.max(minGuests, guests)"></span>
+          <div class="pt-2.5 border-t border-stone-200 flex justify-between items-baseline">
+            <span class="font-bold text-gray-900">Estimated Total:</span>
+            <span class="text-xl font-extrabold text-amber-700" x-text="`${totalPrice} ${currency}`"></span>
           </div>
         </div>
 
-        <div class="mb-4">
-          <div class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
-            Selected Items (<span x-text="selectedDishes.length"></span>)
+        <!-- Selected Dishes Pills -->
+        <div class="mb-5">
+          <div class="text-xs font-semibold text-gray-700 mb-2">
+            Selected Dishes (<span x-text="selectedDishes.length"></span>):
           </div>
           <template x-if="selectedDishes.length === 0">
-            <p class="text-xs text-gray-400 italic">Tick dishes on the left to build your platter.</p>
+            <p class="text-xs text-gray-500 italic">No dishes selected yet—pick from Step 2.</p>
           </template>
-          <ul class="space-y-1.5 max-h-48 overflow-y-auto text-xs">
-            <template x-for="item in selectedDishes" :key="item.name">
-              <li class="flex justify-between items-center bg-gray-50 px-2.5 py-1.5 rounded-lg gap-2">
-                <div class="truncate">
-                  <span x-text="item.name" class="font-medium text-gray-800"></span>
-                  <span
-                    x-show="item.extra_price > 0"
-                    x-text="` (+${item.extra_price} ${currency})`"
-                    class="text-amber-800 font-semibold"
-                  ></span>
-                </div>
+          <div class="flex flex-wrap gap-1.5" x-show="selectedDishes.length > 0">
+            <template x-for="d in selectedDishes" :key="d.name">
+              <span class="inline-flex items-center gap-1 text-[11px] font-medium bg-amber-50 text-amber-950 border border-amber-200 px-2 py-0.5 rounded-md">
+                <span x-text="d.name"></span>
                 <button
                   type="button"
-                  @click="toggleDish(item)"
-                  class="text-red-600 hover:underline shrink-0 font-medium"
+                  @click="toggleDish(d)"
+                  class="text-amber-700 hover:text-red-600 font-bold ml-0.5"
+                  aria-label="Remove dish"
                 >
-                  ✕
+                  ×
                 </button>
-              </li>
+              </span>
             </template>
-          </ul>
+          </div>
         </div>
 
-        <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 flex justify-between items-center">
+        <!-- Success Banner -->
+        <div
+          x-show="submitted"
+          x-cloak
+          class="rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-emerald-900 text-sm space-y-2"
+        >
+          <div class="font-bold text-base">✓ Inquiry Sent!</div>
+          <p class="text-xs leading-relaxed">
+            Thank you, <span class="font-semibold" x-text="form.name"></span>! We have received your menu request and will contact you shortly on phone or email to finalize your event.
+          </p>
+          <button
+            type="button"
+            @click="resetSuccess()"
+            class="mt-2 inline-block text-xs font-semibold underline text-emerald-800 hover:text-emerald-950"
+          >
+            Submit another inquiry
+          </button>
+        </div>
+
+        <!-- Contact Form -->
+        <form x-show="!submitted" @submit.prevent="submitOrder()" class="space-y-3.5" novalidate>
           <div>
-            <span class="block font-bold text-amber-950 text-sm">Estimated Total</span>
-            <span class="text-[11px] text-amber-800" x-text="`For ${Math.max(minGuests, guests)} guests`"></span>
+            <label for="cust-name" class="block text-xs font-semibold text-gray-700 mb-1">
+              Your Name *
+            </label>
+            <input
+              id="cust-name"
+              type="text"
+              x-model="form.name"
+              required
+              placeholder="Full name"
+              class="w-full rounded-xl border border-gray-300 px-3.5 py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+            />
           </div>
-          <span class="text-2xl font-extrabold text-amber-900" x-text="`${totalPrice} ${currency}`"></span>
-        </div>
 
-        <template x-if="submitted">
-          <div class="bg-emerald-50 border border-emerald-200 text-emerald-900 p-4 rounded-xl text-sm">
-            <p class="font-bold mb-1">Thank you! Your custom menu is saved.</p>
-            <p>We will reach out shortly via phone/WhatsApp or email to finalize your event details.</p>
+          <div>
+            <label for="cust-email" class="block text-xs font-semibold text-gray-700 mb-1">
+              Email Address *
+            </label>
+            <input
+              id="cust-email"
+              type="email"
+              x-model="form.email"
+              @blur="touched.email = true"
+              required
+              placeholder="you@example.com"
+              :class="touched.email && form.email && !isValidEmail(form.email)
+                ? 'border-red-400 focus:border-red-500 focus:ring-red-500/20'
+                : 'border-gray-300 focus:border-amber-500 focus:ring-amber-500/20'"
+              class="w-full rounded-xl border px-3.5 py-2 text-sm focus:outline-none focus:ring-2"
+            />
+            <p
+              x-show="touched.email && form.email && !isValidEmail(form.email)"
+              x-cloak
+              class="text-[11px] text-red-600 mt-1"
+            >
+              Enter a valid email address (e.g. name@example.com).
+            </p>
           </div>
-        </template>
 
-        <form x-show="!submitted" @submit.prevent="submitOrder" class="space-y-3">
-          <input
-            type="text"
-            placeholder="Your Name *"
-            required
-            x-model="customer.name"
-            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-          />
-          <input
-            type="email"
-            placeholder="Email Address *"
-            required
-            x-model="customer.email"
-            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-          />
-          <input
-            type="tel"
-            placeholder="Phone / WhatsApp Number *"
-            required
-            x-model="customer.phone"
-            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-          />
-          <input
-            type="date"
-            x-model="customer.event_date"
-            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-600"
-          />
-          <textarea
-            rows="2"
-            placeholder="Spice level, allergies, or special requests (optional)"
-            x-model="customer.notes"
-            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-          ></textarea>
+          <div>
+            <label for="cust-phone" class="block text-xs font-semibold text-gray-700 mb-1">
+              Swedish Phone Number *
+            </label>
+            <input
+              id="cust-phone"
+              type="tel"
+              x-model="form.phone"
+              @blur="touched.phone = true"
+              required
+              placeholder="070-123 45 67 or +46 70 123 45 67"
+              :class="touched.phone && form.phone && !isValidSwedishPhone(form.phone)
+                ? 'border-red-400 focus:border-red-500 focus:ring-red-500/20'
+                : 'border-gray-300 focus:border-amber-500 focus:ring-amber-500/20'"
+              class="w-full rounded-xl border px-3.5 py-2 text-sm focus:outline-none focus:ring-2"
+            />
+            <p
+              x-show="touched.phone && form.phone && !isValidSwedishPhone(form.phone)"
+              x-cloak
+              class="text-[11px] text-red-600 mt-1"
+            >
+              Must be a valid Swedish number (e.g. 070-123 45 67 or +46 70 123 45 67).
+            </p>
+          </div>
 
-          <p x-show="errorMsg" x-text="errorMsg" class="text-xs text-red-600 font-medium"></p>
+          <div>
+            <label for="event-date" class="block text-xs font-semibold text-gray-700 mb-1">
+              Event / Pickup Date
+            </label>
+            <input
+              id="event-date"
+              type="date"
+              x-model="form.event_date"
+              class="w-full rounded-xl border border-gray-300 px-3.5 py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+            />
+          </div>
+
+          <div>
+            <label for="cust-notes" class="block text-xs font-semibold text-gray-700 mb-1">
+              Notes (Spice level, allergies, delivery area)
+            </label>
+            <textarea
+              id="cust-notes"
+              rows="3"
+              x-model="form.notes"
+              placeholder="e.g., Medium spice, nut allergy, delivery to Kista/Solna..."
+              class="w-full rounded-xl border border-gray-300 px-3.5 py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+            ></textarea>
+          </div>
+
+          <!-- Error Banner -->
+          <div
+            x-show="errorMsg"
+            x-cloak
+            class="rounded-xl bg-red-50 border border-red-200 px-3.5 py-2.5 text-xs font-medium text-red-700"
+            x-text="errorMsg"
+          ></div>
 
           <button
             type="submit"
             :disabled="submitting"
-            class="w-full py-3 px-4 rounded-xl bg-gray-900 text-white font-semibold hover:bg-amber-700 transition disabled:opacity-50"
+            class="w-full py-3 px-4 rounded-xl bg-amber-600 hover:bg-amber-500 disabled:opacity-60 text-white font-bold text-sm shadow-sm transition cursor-pointer"
           >
-            <span x-show="!submitting">Send Menu & Request Quote</span>
-            <span x-show="submitting">Sending...</span>
+            <span x-show="!submitting">Send Menu & Request Quote →</span>
+            <span x-show="submitting" x-cloak>Sending Inquiry...</span>
           </button>
         </form>
-      </div>
+      </aside>
     </div>
   </section>
+
+  <script is:inline>
+    function orderBuilder(config) {
+      const defaultPkg = config.packages && config.packages.length > 0 ? config.packages[0] : null;
+      return {
+        packages: config.packages || [],
+        dishes: config.dishes || [],
+        currency: config.currency || 'SEK',
+        activeCategory: 'All',
+        selectedPackage: defaultPkg,
+        guests: defaultPkg ? Math.max(10, Number(defaultPkg.min_guests || 10)) : 10,
+        selectedDishes: [],
+        submitting: false,
+        submitted: false,
+        errorMsg: '',
+        touched: {
+          email: false,
+          phone: false,
+        },
+        form: {
+          name: '',
+          email: '',
+          phone: '',
+          event_date: '',
+          notes: '',
+        },
+
+        selectPackage(pkg) {
+          this.selectedPackage = pkg;
+          const min = Number(pkg.min_guests || 1);
+          if (this.guests < min) {
+            this.guests = min;
+          }
+        },
+
+        decrementGuests() {
+          const min = this.selectedPackage ? Number(this.selectedPackage.min_guests || 1) : 1;
+          if (this.guests > min) {
+            this.guests--;
+          }
+        },
+
+        normalizeGuests() {
+          const min = this.selectedPackage ? Number(this.selectedPackage.min_guests || 1) : 1;
+          if (!this.guests || this.guests < min) {
+            this.guests = min;
+          }
+        },
+
+        isDishSelected(name) {
+          return this.selectedDishes.some((d) => d.name === name);
+        },
+
+        toggleDish(dish) {
+          const idx = this.selectedDishes.findIndex((d) => d.name === dish.name);
+          if (idx >= 0) {
+            this.selectedDishes.splice(idx, 1);
+          } else {
+            this.selectedDishes.push({
+              name: dish.name,
+              category: dish.category,
+              extra_price: Number(dish.extra_price || 0),
+            });
+          }
+        },
+
+        get pricePerPerson() {
+          const base = this.selectedPackage ? Number(this.selectedPackage.base_price || 0) : 0;
+          const extras = this.selectedDishes.reduce((sum, d) => sum + Number(d.extra_price || 0), 0);
+          return base + extras;
+        },
+
+        get totalPrice() {
+          return this.pricePerPerson * Number(this.guests || 0);
+        },
+
+        isValidEmail(email) {
+          return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(email || '').trim());
+        },
+
+        isValidSwedishPhone(phone) {
+          const cleaned = String(phone || '').trim();
+          if (!/^(?:\+46|0046|0)[\s-]*(?:7[02369]|[1-9]\d{0,2})[\s-]*(?:\d[\s-]*){5,8}$/.test(cleaned)) {
+            return false;
+          }
+          const digits = cleaned.replace(/\D/g, '');
+          if (digits.startsWith('0046')) return digits.length >= 12 && digits.length <= 13;
+          if (digits.startsWith('46')) return digits.length >= 10 && digits.length <= 11;
+          if (digits.startsWith('0')) return digits.length >= 9 && digits.length <= 10;
+          return false;
+        },
+
+        resetSuccess() {
+          this.submitted = false;
+          this.errorMsg = '';
+        },
+
+        async submitOrder() {
+          this.errorMsg = '';
+          this.touched.email = true;
+          this.touched.phone = true;
+
+          if (!this.form.name || !this.form.name.trim()) {
+            this.errorMsg = 'Please enter your name.';
+            return;
+          }
+
+          if (!this.isValidEmail(this.form.email)) {
+            this.errorMsg = 'Please enter a valid email address (e.g. name@example.com).';
+            return;
+          }
+
+          if (!this.isValidSwedishPhone(this.form.phone)) {
+            this.errorMsg = 'Please enter a valid Swedish phone number (e.g. 070-123 45 67 or +46 70 123 45 67).';
+            return;
+          }
+
+          if (this.selectedDishes.length === 0) {
+            this.errorMsg = 'Please select at least one dish for your menu.';
+            return;
+          }
+
+          this.submitting = true;
+
+          try {
+            const payload = {
+              name: this.form.name.trim(),
+              email: this.form.email.trim(),
+              phone: this.form.phone.trim(),
+              event_date: this.form.event_date || '',
+              notes: this.form.notes.trim(),
+              guests: Number(this.guests),
+              package_name: this.selectedPackage ? this.selectedPackage.name : '',
+              selected_dishes: this.selectedDishes,
+              price_per_person: this.pricePerPerson,
+              total_price: this.totalPrice,
+              currency: this.currency,
+            };
+
+            const res = await fetch('/api/submit-order', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload),
+            });
+
+            if (!res.ok) {
+              const errData = await res.json().catch(() => ({}));
+              throw new Error(errData.error || `Request failed (${res.status})`);
+            }
+
+            this.submitted = true;
+          } catch (err) {
+            this.errorMsg =
+              err?.message ||
+              'Could not send request right now. Please try again or contact us on Facebook/Phone.';
+          } finally {
+            this.submitting = false;
+          }
+        },
+      };
+    }
+  </script>
 </Layout>

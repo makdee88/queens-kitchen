@@ -1,3 +1,18 @@
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+// Matches Swedish numbers: +46 / 0046 / 0 followed by 7-9 digits (spaces/hyphens allowed)
+const SWEDISH_PHONE_REGEX = /^(?:\+46|0046|0)[\s-]*(?:7[02369]|[1-9]\d{0,2})[\s-]*(?:\d[\s-]*){5,8}$/;
+
+function isValidSwedishPhone(raw) {
+  const cleaned = String(raw || '').trim();
+  if (!SWEDISH_PHONE_REGEX.test(cleaned)) return false;
+  const digits = cleaned.replace(/\D/g, '');
+  // Normalized length: 9-10 digits starting with 0, or 11-12 digits starting with 46 / 0046
+  if (digits.startsWith('0046')) return digits.length >= 12 && digits.length <= 13;
+  if (digits.startsWith('46')) return digits.length >= 10 && digits.length <= 11;
+  if (digits.startsWith('0')) return digits.length >= 9 && digits.length <= 10;
+  return false;
+}
+
 export async function onRequestGet(context) {
   const { env } = context;
   let dbStatus = 'not_bound';
@@ -31,31 +46,53 @@ export async function onRequestPost(context) {
   try {
     const data = await request.json();
 
-    if (!data.name || !data.email || !data.phone) {
+    const name = String(data.name || '').trim();
+    const email = String(data.email || '').trim();
+    const phone = String(data.phone || '').trim();
+
+    if (!name || !email || !phone) {
       return new Response(JSON.stringify({ error: 'Name, email, and phone are required.' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
       });
     }
 
+    if (!EMAIL_REGEX.test(email)) {
+      return new Response(JSON.stringify({ error: 'Please enter a valid email address.' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (!isValidSwedishPhone(phone)) {
+      return new Response(
+        JSON.stringify({ error: 'Please enter a valid Swedish phone number (e.g., 070-123 45 67 or +46 70 123 45 67).' }),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
     const dishesSummary = Array.isArray(data.selected_dishes)
       ? data.selected_dishes
           .map((d) => (Number(d.extra_price) > 0 ? `${d.name} (+${d.extra_price})` : d.name))
           .join(', ')
-      : '';
+      : String(data.selected_dishes || '').trim();
 
     const notesText = String(data.notes || '').trim();
     const formattedTotal = `${Number(data.total_price || 0)} ${data.currency || 'SEK'}`;
 
+    // 1. Primary Safe Storage: Cloudflare D1
     if (env.DB) {
       await env.DB.prepare(
         `INSERT INTO leads (name, email, phone, event_date, guests, package_name, selected_dishes, total_price, notes)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
       )
         .bind(
-          String(data.name),
-          String(data.email),
-          String(data.phone),
+          name,
+          email,
+          phone,
           String(data.event_date || ''),
           Number(data.guests || 0),
           String(data.package_name || ''),
@@ -66,6 +103,7 @@ export async function onRequestPost(context) {
         .run();
     }
 
+    // 2. Mirror Copy to Google Sheets Apps Script Webhook
     if (env.SHEETS_WEBHOOK_URL) {
       try {
         await fetch(env.SHEETS_WEBHOOK_URL, {
@@ -74,12 +112,13 @@ export async function onRequestPost(context) {
           redirect: 'follow',
           body: JSON.stringify({
             timestamp: new Date().toISOString(),
-            name: String(data.name),
-            email: String(data.email),
-            phone: String(data.phone),
+            name,
+            email,
+            phone,
             event_date: String(data.event_date || ''),
             guests: Number(data.guests || 0),
             package_name: String(data.package_name || ''),
+            selected_dishes: dishesSummary,
             dishes: dishesSummary,
             total_price: formattedTotal,
             notes: notesText,
